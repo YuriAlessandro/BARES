@@ -4,11 +4,14 @@
 - Copiei o Stack template que já tinha feito, mas tem que modificar os pops e os
 cleans pra dar destroy (como visto naquela aula de LP).
 - Fiz a tokenização no Main.
+- Tokenização [DONE].
+
+#### Yuri
+- Dormiu e fez nada.
 
 ## TODO
 - O Makefile (Pra aprender logo de uma vez).
 - Copiar a fila pra cá também.
-- Tokenização [DONE].
 - Tratamento de erro sagaz na Tokenização.
 - Mover a Tokenização para uma classe que ainda nem existe.
 - Transformação em notação polonesa.
