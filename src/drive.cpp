@@ -2,12 +2,14 @@
 #include <iomanip>
 #include <cstdlib>
 #include <fstream>
+#include "stackar.h"
+#include "term.h"
 
 int main(int argc, char* argv[])
 {
-	/* String temporária que lerá os arquivos. */
-	char temp;
-    std::string TokenStackNOT[100]; // Talvez nem seja Stack, tem mais cara de lista ou vector
+    // Futuramente será a classe Expression(tm), porém se continuará um stack
+    // é um mistério.
+    StackAr<Term> terms;
 
 	std::string fileName = "test.txt";
 
@@ -23,45 +25,58 @@ int main(int argc, char* argv[])
     	return EXIT_FAILURE;
     }
 
-    // Converte de char pra int e depois pra string, dá pra melhorar
-    // ^ Tá fazendo com essa variável numberCombo e é simplesmente enojante
-    // Usando arranjo e i como contador (simplesmente terrível)
-	while ( !file.eof() ){
-        int tempNumber;
-        bool numberCombo = 0;
-        int i = 0;
-        while ( temp != '\n' and !file.eof() ){
-            file >> temp;
-            std::cout << "Loop: " << i << "; temp = " << temp << "\n";
-            if ( isdigit( temp ) ){ // Operando
-                tempNumber *= 10;
-                tempNumber += temp - '0'; // ASCII bit fuckery
-                numberCombo++;
-            }else{
-                if ( numberCombo != 0 ){
-                    TokenStackNOT[i] = std::to_string( tempNumber );
-                    tempNumber = 0;
-                    numberCombo = 0;
-                    i++;
-                }
-            }
+    // Definitivamente bem melhor agora, porém o (file >> temp) ignora espaços e
+    // símbolos de nova linha, então talvez seja melhor simplesmente usar um
+    // getline e trabalhar em cima disso.
+    std::string currentLine;
+    std::string number;
+    int column = 0;
 
-            if ( temp == '+' or temp == '-' or temp == 'x' ){ // Clássica gambiarra de teste
-                TokenStackNOT[i] = temp;
-                i++;
-            }else{
-                // Tratamento de erro vem aqui
-            }
+    // Loop do arquivo
+	while ( std::getline( file, currentLine ) ){
+
+        // Loop da linha
+	    for ( char temp : currentLine )
+	    {
+	        //std::cout << "temp = " << temp << "\n";
+            column++; // Usar essa variável para checar erros
+
+            // Operando
+	        if ( isdigit( temp ) ){
+	            number += temp;
+	        }else if ( temp == '+' or temp == '-' or temp == '*' or temp == '/' or temp == '%' ){ // Fazer função pra checar isso usando hacks de ASCII
+	            if ( number.size() > 0 )
+                    terms.push( Term( number, true ) );
+
+                number = "";
+                terms.push ( Term( std::string( 1, temp ), false ) );
+	        }else{
+                if ( temp != ' ' ) std::cout << ">>>> I, the program, have no idea of what this might be: "
+                << temp << " on column " << column << std::endl;
+	            // Tratamento de erros vem aqui.
+                // Espaços não são erros, então fica assim até colocar os erros reais.
+                // Idealmente vamos pelos erros específicos, sem usar nenhum "else" que possa
+                // pegar coisas estranhas.
+	        }
+
         }
+
+	    // jogando restos do loop onde devem ficar, resetando valores
+	    if ( number.size() > 0 ) terms.push( Term( number, true ) );
+	    number = "";
+
+	    // Coloca no stack quando termina de ler uma linha para testar
+	    // terms.push( Term( "Testing purposes", false ) );
 	}
 
 	file.close();
 
-    std::cout << "[ ";
-    for ( int i = 0; i < 100; ++i )
-        if ( TokenStackNOT[i] != "" )
-            std::cout << TokenStackNOT[i] << ", ";
-
+    // Teste
+    std::cout << "\n[ ";
+    while ( !terms.isEmpty() ){
+        Term printingTerm = terms.pop();
+        std::cout << printingTerm.getValue() << ", ";
+    }
     std::cout << "]\n";
 
 

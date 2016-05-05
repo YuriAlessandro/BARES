@@ -35,8 +35,6 @@ Object StackAr<Object>::pop()
 template<typename Object>
 Object StackAr<Object>::top() const{
 	return m_stack[ m_top-1 ];
-	std::cout << "Funcao ";
-
 }
 
 template<typename Object>
