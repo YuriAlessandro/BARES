@@ -75,7 +75,7 @@ int main(int argc, char* argv[])
     std::cout << "\n[ ";
     while ( !terms.isEmpty() ){
         Term printingTerm = terms.dequeue();
-        std::cout << printingTerm.getValue() << ", ";
+        std::cout << printingTerm.getValue() << " ";
     }
     std::cout << "]\n";
 
@@ -84,6 +84,7 @@ int main(int argc, char* argv[])
 }
 
 /*
+[[[ Erros que precisam ser tratados ]]]
 1. Numeric constant out of range: Um dos operandos da express ̃ao est ́a fora da faixa
 permitida.
 Ex.: 1000000 − 2, coluna 1.
@@ -106,7 +107,68 @@ mento ’)’ para um parˆentese de abertura ‘(’ correspondente.
 Ex.: ((2%3) ∗ 8, coluna 1.
 */
 
-bool parsing( std::string unparsed ){
+/*
+[Testes do Parsing]
+i1 = 4 -> 19, oldColumn = 5
+i2 = 5 -> 12, oldColumn = 11
+i3 = 5
+column = 20
+3 + ( 4 - (5 * 7) )
+( ( (ads + 3) ( 4 ) ) ) )
+3 + ()
+*/
+
+// Chamar na Tokenização como int error = parsing( currentLine, column ); //column = 1.
+
+// Caso o último termo seja um parêntese válido, column ficará além dos bounds da string
+// Porém não será um problema mas já será uma expressão válida.
+
+// Existe possibilidade de inserir os elementos na fila já no processo de
+// Parsing. Para isso, seria necessário passar a fila por referência e ter
+// sorte na hora da implementação.
+
+// Pode ser abusado com 3 + (), tem que ajeitar.
+
+// Como a lógica de Operandos ainda não foi aplicada corretamente, expressões como
+// (3 + 4)(5 * 5) ainda são corretas (na verdade tudo é), então lembrar de modificar
+// os booleanos na volta da recursão.
+int parsing( const std::string & bunparsed, int & column ){
+
+    // Necessário para as lógicas de teste
+    bool operatorAllowed = false;
+    bool numberAllowed = true;
+    bool unaryAllowed = true;
+    //bool isEmpty = true;
+
+    // Necessário para a lógica de parêntese
+    bool needsClosingBraces = !( column == 1 )
+
+    // i representa a coluna da substring atual
+    for ( int i = 0; i < bunparsed.size(); i++, column++ )
+    {
+        // Pula espaços e tabs (existe mais algum outro whitespace?)
+        if ( bunparsed[i] == ' ' or bunparsed[i] == '  ' ) continue;
+
+        // Passo recursivo dos parênteses.
+        if ( bunparsed[i] == '(' ){
+            int oldColumn = column;
+            int error = parsing( bunparsed.substr( i + 1 ), ++column );
+            if ( error ) return error;
+
+            i += column - oldColumn;
+        } else if ( bunparsed[i] == ')' and needsClosingBraces ){
+            return 0;
+        } else {
+            // Todo resto deve vir aqui.
+            // Isto é, procurar pelos erros comuns.
+        }
+    }
+
+    //[[[[[[[[[[[[[[[[[[[[[[[[[[[[[ Lógica abaixo ]]]]]]]]]]]]]]]]]]]]]]]]]]]]]
+    // Ordem das operações:
+    // Primeiro passe para tratamento de parêntese
+    // Segundo passo para procura de erros com recursão e lógica de Operando,
+    // Operador e @.
 
     // Se número, testa por tamanho
     // Deve haver um operando após um operador
@@ -118,4 +180,49 @@ bool parsing( std::string unparsed ){
 
     // Parênteses podem ser lindamente parsados com stacks.
 
+    // Aprendizados:
+       // Número -> Símbolo || ')'
+       // Símbolo -> Número || '(' || @
+       // @ -> @ || Número || '('
+       //
+       // Onde:
+           // @ : Número -> Número
+           // @- = λx. -x
+           // @+ = λx. x
+
+       // () : Subset de Número
+           // ( Se válido como número, está ok )
+
+
+    // Uma atenção:
+       // Quando chamar recursivamente, jogar ++column.
+       // Quando receber corretamente, fazer ++column (já recebida)
+       // Isso, para compensar pelos '(' e ')' pulados.
+
+    //[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[ Lógica acima ]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]
+
+
+    return 0; // Para sucesso bem-sucedido.
 }
+
+/*
+[WARNING] TEST AREA [WARNING]
+
+3 + (-4 * ( 3 + d ) ) Não mais merda
+
+3 + ((2 - 3)
+3 + (2 - 3))
+
+-2 -----3 + -(4+5)
+2 u 3 u u u u - 4 5 + u +
+
+--3 * (5 - 6)
+3 u u 5 6 - *
+
+(4 + 5) * ---7
+4 5 + 7 u u u *
+
+3 * 2 * - 3
+3 2 * 3 u *
+
+*/
