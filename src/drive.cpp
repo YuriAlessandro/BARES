@@ -44,7 +44,9 @@ int main(int argc, char* argv[])
             // Operando
 	        if ( isdigit( temp ) ){
 	            number += temp;
-	        }else if ( temp == '+' or temp == '-' or temp == '*' or temp == '/' or temp == '%' or temp == '(' or temp == ')'){ // Fazer função pra checar isso usando hacks de ASCII
+
+            // Fazer função pra checar isso usando hacks de ASCII
+	        }else if ( temp == '+' or temp == '-' or temp == '*' or temp == '/' or temp == '%' or temp == '(' or temp == ')'){
 	            if ( number.size() > 0 )
                     terms.enqueue( Term( number, true ) );
 
@@ -88,14 +90,14 @@ int main(int argc, char* argv[])
 1. Numeric constant out of range: Um dos operandos da express ̃ao est ́a fora da faixa
 permitida.
 Ex.: 1000000 − 2, coluna 1.
-2. Ill-formed expression or missing term detected: Em alguma parte da express ̃ao est ́a
+2. Ill-formed expression or missing term detected: Em alguma parte da expressão está
 faltando um operando ou existe algum operando em formato errado.
 Ex.: 2+, coluna 3; ou 3 ∗ d, coluna 5.
-3. Invalid operand: Existe um s ́ımbolo correspondente a um operador que n ̃ao est ́a na
-lista de operadores v ́alidos.
+3. Invalid operand: Existe um sımbolo correspondente a um operador que nao está na
+lista de operadores válidos.
 Ex.: 2 = 3, coluna 3; ou 2.3 + 4, coluna 2.
-4. Extraneous symbol: Aparentemente o programa encontrou um s ́ımbolo extra “perdido”
-na express ̃ao.
+4. Extraneous symbol: Aparentemente o programa encontrou um símbolo extra “perdido”
+na expressão.
 Ex.: 2 ∗ 3 4, coluna 7 ou (−3 ∗ 4)(10 ∗ 5), coluna 7.
 5. Mismatch ’)’: Existem um parˆentese fechando sem ter um parˆentese abrindo corres-
 pondente.
@@ -134,18 +136,20 @@ column = 20
 // os booleanos na volta da recursão.
 int parsing( const std::string & bunparsed, int & column ){
 
+    // Number substring
+    std::string number = "";
+
     // Necessário para as lógicas de teste
-    bool operatorAllowed = false;
-    bool numberAllowed = true;
-    bool unaryAllowed = true;
+    bool expectsOperator = false;
+    bool expectsNumber = true;
+    bool expectsUnary = true;
     //bool isEmpty = true;
 
     // Necessário para a lógica de parêntese
     bool needsClosingBraces = !( column == 1 )
 
     // i representa a coluna da substring atual
-    for ( int i = 0; i < bunparsed.size(); i++, column++ )
-    {
+    for ( int i = 0; i < bunparsed.size(); i++, column++ ) {
         // Pula espaços e tabs (existe mais algum outro whitespace?)
         if ( bunparsed[i] == ' ' or bunparsed[i] == '  ' ) continue;
 
@@ -158,9 +162,81 @@ int parsing( const std::string & bunparsed, int & column ){
             i += column - oldColumn;
         } else if ( bunparsed[i] == ')' and needsClosingBraces ){
             return 0;
+
+        // Esse else talvez seja removido. (Ver caso 4 e problema de parêntese
+        // enfileirado)
+        // Bem provavelmente será, o erro 1 precisa antes da análise no número
+        // que só vem depois nesse momento.
+        // Talvez mover o erro 1 para dentro da análise de número.
+
+        // As opções são ou tratar os erros 4 e 7 no fim da recursão ou dar um
+        // jeito de tratá-los por fora
+        // O erro 2 também se aproveitaria de isOperand() (errado atualmente),
+        // Porém daria erro em algo como 3 + (
+
+        // Funções a serem feitas:
+            // isOperand() : isdigit + '(' (Só necessário se mudar implementação,
+            // mudará todos os isdigit())
+            // isUnary() : '+' or '-'
+
         } else {
-            // Todo resto deve vir aqui.
-            // Isto é, procurar pelos erros comuns.
+            // Tratamento dos erros
+            if ( false ) // 1. Numeric constant out of range
+            {
+                // Dá pra fazer com gambiarra, não recomendado
+                return 1;
+            }
+            else if ( expectsNumber and !isdigit( bunparsed[i] ) // 2. Ill-formed expression or missing term detected
+            {
+                return 2;
+            }
+            else if ( expectsOperator and !validOperator( bunparsed[i] ) ) // 3. Invalid operand
+            {
+                return 3;
+            }
+            else if ( !expectsNumber and isdigit( bunparsed[i] ) ) // 4. Extraneous symbol
+            {
+                return 4
+            }
+            else if ( !needsClosingBraces and bunparsed[i] == ')' ) // 5. Mismatch ’)’
+            {
+                return 5;
+            }
+            else if ( !expectsOperator and !isdigit( bunparsed[i] ) and !isUnary( bunparsed[i] ) ) // 6. Lost operator
+            {
+                return 6;
+            }
+            else if ( needsClosingBraces and i+1 = bunparsed.size() ) // 7. Missing closing ‘)’ to match opening ‘)’ at
+            {
+                // Precisa de tratamento de erro num grau de recursão acima para as colunas.
+                return 7;
+            }
+
+            // Continua se normal
+            else
+            {
+                // Número
+                if ( isdigit( bunparsed[i] ) ){
+                    number += bunparsed[i];
+                    while ( isdigit( bunparsed[ i+1 ] ) ){
+                        i++; column++;
+                        number += bunparsed[i];
+                    }
+
+                    expectsNumber = false;
+                    expectsUnary = false;
+                    expectsOperator = true;
+                }
+
+                // Operador
+                else {
+                    expectsNumber = true;
+                    expectsUnary = true;
+                    expectsOperator = false;
+                }
+
+                std::cout << ">>> We're at column " << column << ", no errors found yet.\n";
+            }
         }
     }
 
@@ -204,6 +280,21 @@ int parsing( const std::string & bunparsed, int & column ){
 
     return 0; // Para sucesso bem-sucedido.
 }
+
+bool validOperator( const char & op ){
+    return ( op == '+' ) or ( op == '-' ) or ( op == '*' ) or
+           ( op == '/' ) or ( op == '^' ) or ( op == '%' );
+}
+
+bool isUnary( const char & op ){
+    return ( op == '+' ) or ( op == '-' );
+}
+
+/*
+bool isOperand( const char & op ){
+    return isdigit( op ) or ( op == '(' );
+}
+*/
 
 /*
 [WARNING] TEST AREA [WARNING]

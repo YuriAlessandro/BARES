@@ -11,7 +11,7 @@ cleans pra dar destroy (como visto naquela aula de LP).
 ## TODO
 - O Makefile (Pra aprender logo de uma vez).
 - O MAKEFILE.
-- Tratamento de erro sagaz na Tokenização [EM PROGRESSO].
+- Tratamento de erro sagaz na Tokenização [EM PROGRESSO [QUASE LÁ]].
 - Mover a Tokenização para uma classe que ainda nem existe.
 - Transformação em notação polonesa.
 - A parte da calculadora que calcula (a calculadora em si).
