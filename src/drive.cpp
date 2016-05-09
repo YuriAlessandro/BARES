@@ -134,15 +134,16 @@ column = 20
 // Como a lógica de Operandos ainda não foi aplicada corretamente, expressões como
 // (3 + 4)(5 * 5) ainda são corretas (na verdade tudo é), então lembrar de modificar
 // os booleanos na volta da recursão.
+
+// Trocar "expects" para "previouslyWasNumber"
 int parsing( const std::string & bunparsed, int & column ){
 
     // Number substring
     std::string number = "";
 
     // Necessário para as lógicas de teste
-    bool expectsOperator = false;
+    bool previouslyWasNumber = false;
     bool expectsNumber = true;
-    bool expectsUnary = true;
     //bool isEmpty = true;
 
     // Necessário para a lógica de parêntese
@@ -150,94 +151,117 @@ int parsing( const std::string & bunparsed, int & column ){
 
     // i representa a coluna da substring atual
     for ( int i = 0; i < bunparsed.size(); i++, column++ ) {
-        // Pula espaços e tabs (existe mais algum outro whitespace?)
+        // Pula espaços e tabs (whitespace)
         if ( bunparsed[i] == ' ' or bunparsed[i] == '  ' ) continue;
 
+        // Restam o E1 e o E7
+        // Fazer o E1 considerando os unários
+        // Fazer o E7 com um toque de gambiarra
+        // Implementar já a inserção numa fila de saída porque tá muito na cara
+
+        // Tratamento dos erros
+
+        // Precisa de ')' e não tem ')'
+        if ( needsClosingBraces and i+1 = bunparsed.size() and ( bunparsed[i] != ')' ) ) // 7. Missing closing ‘)’ to match opening ‘)’ at
+        {
+            // Precisa de tratamento de erro num grau de recursão acima para as colunas.
+            return 7/*0*/;
+        }
+
+        // Tenho operador e vem um operador binário conhecido
+        else if ( !previouslyWasNumber and validOperator( bunparsed[i] ) and !isUnary( bunparsed[i] ) ) // 6. Lost operator
+        {
+            return 6;
+        }
+
+        // Não precisa de ')' e vem ')'
+        else if ( !needsClosingBraces and bunparsed[i] == ')' ) // 5. Mismatch ’)’
+        {
+            return 5;
+        }
+
+        // Tenho número e vem número
+        else if ( previouslyWasNumber and isOperand( bunparsed[i] ) ) // 4. Extraneous symbol
+        {
+            return 4;
+        }
+
+        // Tenho número e vem algo estranho
+        else if ( previouslyWasNumber and !validOperator( bunparsed[i] ) ) // 3. Invalid operand
+        {
+            return 3;
+        }
+
+        // Os último caso pode se preocupar com menos caso, pois já foram tratados acima
+        // Não precisa de !validOperator pois já foi tratado em Lost Operator
+        // Tenho operador e vem algo estranho
+        else if ( !previouslyWasNumber and !isOperand( bunparsed[i] ) and !isUnary( bunparsed[i] ) ) // 2. Ill-formed expression
+        {
+            return 2;
+        }
+
+        // Tenho operador e acaba a recursão sem número
+        else if ( !previouslyWasNumber and !isOperand( bunparsed[i] ) and bunparsed[i] == ')' ) // 2. Missing term detected
+        {
+            return 2;
+        }
+
         // Passo recursivo dos parênteses.
-        if ( bunparsed[i] == '(' ){
+        // COLOQUE OS previouslyWasNumber
+        else if ( bunparsed[i] == '(' ){
             int oldColumn = column;
             int error = parsing( bunparsed.substr( i + 1 ), ++column );
+            /*
+            if ( error == 70 ){
+                column = oldColumn;
+                return 7;
+            }
+            */
             if ( error ) return error;
 
             i += column - oldColumn;
-        } else if ( bunparsed[i] == ')' and needsClosingBraces ){
+            previouslyWasNumber = true;
+
+        // Não precisa de needsClosingBraces pois o erro foi tratada acima.
+        } else if ( bunparsed[i] == ')' ){
             return 0;
+        }
 
-        // Esse else talvez seja removido. (Ver caso 4 e problema de parêntese
-        // enfileirado)
-        // Bem provavelmente será, o erro 1 precisa antes da análise no número
-        // que só vem depois nesse momento.
-        // Talvez mover o erro 1 para dentro da análise de número.
-
-        // As opções são ou tratar os erros 4 e 7 no fim da recursão ou dar um
-        // jeito de tratá-los por fora
-        // O erro 2 também se aproveitaria de isOperand() (errado atualmente),
-        // Porém daria erro em algo como 3 + (
-
-        // Funções a serem feitas:
-            // isOperand() : isdigit + '(' (Só necessário se mudar implementação,
-            // mudará todos os isdigit())
-            // isUnary() : '+' or '-'
-
-        } else {
-            // Tratamento dos erros
-            if ( false ) // 1. Numeric constant out of range
-            {
-                // Dá pra fazer com gambiarra, não recomendado
-                return 1;
-            }
-            else if ( expectsNumber and !isdigit( bunparsed[i] ) // 2. Ill-formed expression or missing term detected
-            {
-                return 2;
-            }
-            else if ( expectsOperator and !validOperator( bunparsed[i] ) ) // 3. Invalid operand
-            {
-                return 3;
-            }
-            else if ( !expectsNumber and isdigit( bunparsed[i] ) ) // 4. Extraneous symbol
-            {
-                return 4
-            }
-            else if ( !needsClosingBraces and bunparsed[i] == ')' ) // 5. Mismatch ’)’
-            {
-                return 5;
-            }
-            else if ( !expectsOperator and !isdigit( bunparsed[i] ) and !isUnary( bunparsed[i] ) ) // 6. Lost operator
-            {
-                return 6;
-            }
-            else if ( needsClosingBraces and i+1 = bunparsed.size() ) // 7. Missing closing ‘)’ to match opening ‘)’ at
-            {
-                // Precisa de tratamento de erro num grau de recursão acima para as colunas.
-                return 7;
-            }
-
-            // Continua se normal
-            else
-            {
-                // Número
-                if ( isdigit( bunparsed[i] ) ){
+        // Continua se normal
+        else {
+            // Número
+            if ( isdigit( bunparsed[i] ) ){
+                number += bunparsed[i];
+                while ( isdigit( bunparsed[ i+1 ] ) ){
+                    i++; column++;
                     number += bunparsed[i];
-                    while ( isdigit( bunparsed[ i+1 ] ) ){
-                        i++; column++;
-                        number += bunparsed[i];
-                    }
-
-                    expectsNumber = false;
-                    expectsUnary = false;
-                    expectsOperator = true;
                 }
 
-                // Operador
-                else {
-                    expectsNumber = true;
-                    expectsUnary = true;
-                    expectsOperator = false;
+                if ( false /* outOfBounds( (-1)^negUnaries * atoi( number ) )*/ ) // 1. Numeric constant out of range
+                {
+                    /* column += 1 - number.size() - negUnaries - posUnaries */
+                    return 1;
                 }
 
-                std::cout << ">>> We're at column " << column << ", no errors found yet.\n";
+                // negUnaries = 0;
+                // posUnaries = 0;
+                previouslyWasNumber = true;
+            }
+
+            // Operador
+            else {
+                previouslyWasNumber = false;
+            }
+
+            std::cout << ">>> We're at column " << column << ", no errors found yet.\n";
+
             }
         }
+
+        // Tenho operador e acaba a linha
+        if ( !previouslyWasNumber )
+            return 2;
+
     }
 
     //[[[[[[[[[[[[[[[[[[[[[[[[[[[[[ Lógica abaixo ]]]]]]]]]]]]]]]]]]]]]]]]]]]]]
@@ -290,11 +314,9 @@ bool isUnary( const char & op ){
     return ( op == '+' ) or ( op == '-' );
 }
 
-/*
 bool isOperand( const char & op ){
     return isdigit( op ) or ( op == '(' );
 }
-*/
 
 /*
 [WARNING] TEST AREA [WARNING]

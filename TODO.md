@@ -30,6 +30,15 @@ Mentira de novo. Pela complexidade dos erros, o melhor é fazer mesmo uma funç�
 parsing que aja antes da tokenização (pois a mesma apaga espaços e etc) [EM PROGRESSO].
 
 ## Dúvidas
-- Ordem dos erros ( (3 +d) é E2, E3 ou E6? E (3 += 4)? )
+- Ordem dos erros ( (3 +d) é E2? E (3 += 4)? )
 - 3 + () é uma entrada possível e errada? (Certeza que é, resolva)
 - E 3 + () 4? (Mesma coisa)
+- 2 + (((3)))
+- ++++4 ---5 -> Válido?
+- +-+-+--+6 -> Válido?
+- -----10000000 -> Erro de overflow na coluna 1 ou 6?
+- 3 ) 4 -> é E3 ou E5?
+- 3 + ) -> é E3 ou E5?
+- 2 + ( -> é E2 ou E7?
+- Na calculadora, nós temos que converter os operadores em "operações" ou faz
+com algo estilo switch case?
