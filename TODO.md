@@ -4,15 +4,16 @@
 - Copiei o Stack template que já tinha feito, mas tem que modificar os pops e os
 cleans pra dar destroy (como visto naquela aula de LP).
 - Tokenização [DONE].
+- Parsing [DONE?].
 
 #### Yuri
-- Dormiu e fez nada.
+- Fez um arquivo legal pra FMC2.
 
 ## TODO
 - O Makefile (Pra aprender logo de uma vez).
 - O MAKEFILE.
-- Tratamento de erro sagaz na Tokenização [EM PROGRESSO [QUASE LÁ]].
-- Mover a Tokenização para uma classe que ainda nem existe.
+- Fazer o Parsing tokenizar.
+- Mover a Tokenização para uma classe que ainda nem existe?
 - Transformação em notação polonesa.
 - A parte da calculadora que calcula (a calculadora em si).
 
@@ -23,7 +24,7 @@ já fizeram na nossa frente).
 - Possivelmente uma classe para erros (Aroma de functors no ar(?)).
 
 ## Cuidados e Pensamentos Altos
-- O operador unário atrapalha tudo, complicado.
+- ~~O operador unário atrapalha tudo, complicado.~~ Não mais!
 - Alguns erros são melhores tratados no parsing, e outros na transformação.
 - Identificar a coluna dos erros será um problema ~~grande e chato~~. ~~Mentiraaa!~~
 Mentira de novo. Pela complexidade dos erros, o melhor é fazer mesmo uma função de

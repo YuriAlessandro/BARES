@@ -2,9 +2,11 @@
 #include <iomanip>
 #include <cstdlib>
 #include <fstream>
+#include <cmath>
 #include "queuear.h"
 #include "term.h"
 
+// Em breve será completamente alterado.
 int main(int argc, char* argv[])
 {
     // Futuramente será a classe Expression(tm), porém se continuará um stack
@@ -110,7 +112,7 @@ Ex.: ((2%3) ∗ 8, coluna 1.
 */
 
 /*
-[Testes do Parsing]
+[Testes de cabeça do Parsing]
 i1 = 4 -> 19, oldColumn = 5
 i2 = 5 -> 12, oldColumn = 11
 i3 = 5
@@ -143,29 +145,28 @@ int parsing( const std::string & bunparsed, int & column ){
 
     // Necessário para as lógicas de teste
     bool previouslyWasNumber = false;
-    bool expectsNumber = true;
+    int negUnaries = 0;
+    int posUnaries = 0;
     //bool isEmpty = true;
 
     // Necessário para a lógica de parêntese
-    bool needsClosingBraces = !( column == 1 )
+    bool needsClosingBraces = !( column == 1 );
 
     // i representa a coluna da substring atual
     for ( int i = 0; i < bunparsed.size(); i++, column++ ) {
         // Pula espaços e tabs (whitespace)
         if ( bunparsed[i] == ' ' or bunparsed[i] == '  ' ) continue;
 
-        // Restam o E1 e o E7
-        // Fazer o E1 considerando os unários
-        // Fazer o E7 com um toque de gambiarra
+        // TODO INTERNO:
         // Implementar já a inserção numa fila de saída porque tá muito na cara
 
         // Tratamento dos erros
-
         // Precisa de ')' e não tem ')'
         if ( needsClosingBraces and i+1 = bunparsed.size() and ( bunparsed[i] != ')' ) ) // 7. Missing closing ‘)’ to match opening ‘)’ at
         {
-            // Precisa de tratamento de erro num grau de recursão acima para as colunas.
-            return 7/*0*/;
+            // Precisa de tratamento de erro num grau de recursão acima para as
+            // colunas. Por isso o 70.
+            return 70;
         }
 
         // Tenho operador e vem um operador binário conhecido
@@ -207,20 +208,20 @@ int parsing( const std::string & bunparsed, int & column ){
         }
 
         // Passo recursivo dos parênteses.
-        // COLOQUE OS previouslyWasNumber
         else if ( bunparsed[i] == '(' ){
             int oldColumn = column;
             int error = parsing( bunparsed.substr( i + 1 ), ++column );
-            /*
             if ( error == 70 ){
                 column = oldColumn;
                 return 7;
             }
-            */
+
             if ( error ) return error;
 
             i += column - oldColumn;
             previouslyWasNumber = true;
+
+            continue;
 
         // Não precisa de needsClosingBraces pois o erro foi tratada acima.
         } else if ( bunparsed[i] == ')' ){
@@ -229,40 +230,56 @@ int parsing( const std::string & bunparsed, int & column ){
 
         // Continua se normal
         else {
-            // Número
-            if ( isdigit( bunparsed[i] ) ){
+
+            if ( isdigit( bunparsed[i] ) ) // Número
+            {
                 number += bunparsed[i];
                 while ( isdigit( bunparsed[ i+1 ] ) ){
                     i++; column++;
                     number += bunparsed[i];
                 }
 
-                if ( false /* outOfBounds( (-1)^negUnaries * atoi( number ) )*/ ) // 1. Numeric constant out of range
+                // Erros de compilação provavelmente serão jogados abaixo.
+                if ( isOutOfBounds( pow( -1, negUnaries ) * stoi( number ) ) ) // 1. Numeric constant out of range
                 {
-                    /* column += 1 - number.size() - negUnaries - posUnaries */
+                    column += 1 - number.size() - negUnaries - posUnaries;
                     return 1;
                 }
 
-                // negUnaries = 0;
-                // posUnaries = 0;
+                negUnaries = 0;
+                posUnaries = 0;
                 previouslyWasNumber = true;
             }
-
-            // Operador
-            else {
-                previouslyWasNumber = false;
+            else // Operadores
+            {
+                if ( !previouslyWasNumber ) // Unários
+                {
+                    if ( bunparsed[i] == '-' )
+                        negUnaries++;
+                    // A comparação abaixo é teoricamente desnecessário pois se
+                    // não há a possibilidade de erros, a única outra escolha
+                    // seria o unário '+'
+                    else /* if ( bunparsed[i] == '+' ) */
+                        posUnaries++;
+                }
+                else // Binários
+                {
+                    previouslyWasNumber = false;
+                }
             }
 
             std::cout << ">>> We're at column " << column << ", no errors found yet.\n";
 
-            }
         }
-
-        // Tenho operador e acaba a linha
-        if ( !previouslyWasNumber )
-            return 2;
-
     }
+
+    // Tenho operador e acaba a linha
+    if ( !previouslyWasNumber )
+        return 2;
+
+    return 0; // Para sucesso bem-sucedido.
+}
+
 
     //[[[[[[[[[[[[[[[[[[[[[[[[[[[[[ Lógica abaixo ]]]]]]]]]]]]]]]]]]]]]]]]]]]]]
     // Ordem das operações:
@@ -301,8 +318,6 @@ int parsing( const std::string & bunparsed, int & column ){
 
     //[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[ Lógica acima ]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]
 
-
-    return 0; // Para sucesso bem-sucedido.
 }
 
 bool validOperator( const char & op ){
@@ -316,6 +331,10 @@ bool isUnary( const char & op ){
 
 bool isOperand( const char & op ){
     return isdigit( op ) or ( op == '(' );
+}
+
+bool isOutOfBounds( const int & num ){
+    return ( num < -32768 ) or ( num > 32767 );
 }
 
 /*
