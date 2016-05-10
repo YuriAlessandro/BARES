@@ -68,7 +68,7 @@ public:
         if ( m_front == -1 )
             m_front = 0;
 
-        if ( ( m_back + 1 ) % m_capacity == m_front )
+        if ( ( m_back != -1 ) and ( m_back + 1 ) % m_capacity == m_front )
             this->resize();
 
         m_back = ( m_back + 1 ) % m_capacity;
@@ -107,6 +107,7 @@ public:
         m_front = -1;
         m_back = -1;
     }
+    
 };
 
 #endif

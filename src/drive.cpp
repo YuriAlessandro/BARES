@@ -7,20 +7,25 @@
 #include "queuear.h"
 #include "term.h"
 
+#define FILENAME "test"
+
 bool validOperator( const char & op );
 bool isUnary( const char & op );
 bool isOperand( const char & op );
 bool isOutOfBounds( const int & num );
-int parsing( const std::string & bunparsed, int & column );
+int parseAndTokenize( QueueAr<Term> & termQueue, const std::string & bunparsed, int & column );
 
-// Em breve será completamente alterado.
 int main(int argc, char* argv[])
 {
-    // Futuramente será a classe Expression(tm), porém se continuará um stack
-    // é um mistério.
+    std::string fileName;
     QueueAr<Term> terms;
 
-	std::string fileName = "EXIT.txt";
+    if ( argc > 1 )
+        fileName = argv[1];
+    else
+        fileName = FILENAME;
+
+    fileName += ".txt";
 
 	/* Avisa para o usuário que o arquivo será lido.*/
 	std::cout << ">>> Preparing to read bet file [" << fileName << "], please wait...\n";
@@ -34,10 +39,7 @@ int main(int argc, char* argv[])
     	return EXIT_FAILURE;
     }
 
-
-    // Definitivamente bem melhor agora, porém o (file >> temp) ignora espaços e
-    // símbolos de nova linha, então talvez seja melhor simplesmente usar um
-    // getline e trabalhar em cima disso.
+    // Início do processo de parsing e tokenização
     std::string currentLine;
     int column;
     int errorId;
@@ -45,59 +47,31 @@ int main(int argc, char* argv[])
     // Loop do arquivo
 	while ( std::getline( file, currentLine ) ){
         column = 1;
-        errorId = parsing( currentLine, column );
+        errorId = parseAndTokenize( terms, currentLine, column );
 
-        if ( errorId )
+        if ( errorId ){
             std::cout << "E" << errorId << " " << column << "\n";
-        else
-            std::cout << "OK" << "\n";
-/*
-        // Loop da linha
-	    for ( char temp : currentLine )
-	    {
-	        //std::cout << "temp = " << temp << "\n";
-            column++; // Usar essa variável para checar erros
+        } else {
+            
+            // Toda a parte da calculadora virá aqui.
 
-            // Operando
-	        if ( isdigit( temp ) ){
-	            number += temp;
-
-            // Fazer função pra checar isso usando hacks de ASCII
-	        }else if ( temp == '+' or temp == '-' or temp == '*' or temp == '/' or temp == '%' or temp == '(' or temp == ')'){
-	            if ( number.size() > 0 )
-                    terms.enqueue( Term( number, true ) );
-
-                number = "";
-                terms.enqueue( Term( std::string( 1, temp ), false ) );
-	        }else{
-                if ( temp != ' ' ) std::cout << ">>>> I, the program, have no idea of what this might be: "
-                << temp << " on column " << column << std::endl;
-	            // Tratamento de erros vem aqui.
-                // Espaços não são erros, então fica assim até colocar os erros reais.
-                // Idealmente vamos pelos erros específicos, sem usar nenhum "else" que possa
-                // pegar coisas estranhas.
-	        }
+            // Teste
+            std::cout << "[ ";
+            while ( !terms.isEmpty() ){
+                Term printingTerm = terms.dequeue();
+                std::cout << printingTerm.getValue() << " ";
+            }
+            std::cout << "]\n";
 
         }
 
-	    // jogando restos do loop onde devem ficar, resetando valores
-	    if ( number.size() > 0 ) terms.enqueue( Term( number, true ) );
-	    number = "";
+        terms.makeEmpty();
 
-	    // Coloca no stack quando termina de ler uma linha para testar
-	    // terms.enqueue( Term( "Testing purposes", false ) );
-*/
 	}
 
 	file.close();
 /*
-    // Teste
-    std::cout << "\n[ ";
-    while ( !terms.isEmpty() ){
-        Term printingTerm = terms.dequeue();
-        std::cout << printingTerm.getValue() << " ";
-    }
-    std::cout << "]\n";
+
 */
 
     return 0;
@@ -138,20 +112,9 @@ column = 20
 3 + ()
 */
 
-// Chamar na Tokenização como int error = parsing( currentLine, column ); //column = 1.
 
 // Caso o último termo seja um parêntese válido, column ficará além dos bounds da string
 // Porém não será um problema mas já será uma expressão válida.
-
-// Existe possibilidade de inserir os elementos na fila já no processo de
-// Parsing. Para isso, seria necessário passar a fila por referência e ter
-// sorte na hora da implementação.
-
-// Pode ser abusado com 3 + (), tem que ajeitar.
-
-// Como a lógica de Operandos ainda não foi aplicada corretamente, expressões como
-// (3 + 4)(5 * 5) ainda são corretas (na verdade tudo é), então lembrar de modificar
-// os booleanos na volta da recursão.
 
 bool validOperator( const char & op ){
     return ( op == '+' ) or ( op == '-' ) or ( op == '*' ) or
@@ -171,7 +134,7 @@ bool isOutOfBounds( const int & num ){
 }
 
 // Trocar "expects" para "previouslyWasNumber"
-int parsing( const std::string & bunparsed, int & column ){
+int parseAndTokenize( QueueAr<Term> & termQueue, const std::string & bunparsed, int & column ){
 
     // Number substring
     std::string number = "";
@@ -183,22 +146,18 @@ int parsing( const std::string & bunparsed, int & column ){
 
     // Necessário para a lógica de parêntese
     bool needsClosingBraces = !( column == 1 );
-    //std::cout << "needsClosingBraces: " << needsClosingBraces << "\n";
 
     // i representa a coluna da substring atual
     for ( auto i = 0u; i < bunparsed.size(); i++, column++ ) {
         // Pula espaços e tabs (whitespace)
         if ( bunparsed[i] == ' ' or bunparsed[i] == '\t' ) continue;
 
-        // TODO INTERNO:
-        // Implementar já a inserção numa fila de saída porque tá muito na cara
-
-        // Tratamento dos erros
+        /////// Tratamento dos erros ///////
         // Precisa de ')' e não tem ')'
         if ( needsClosingBraces and ( i+1 == bunparsed.size() ) and ( bunparsed[i] != ')' ) ) // 7. Missing closing ‘)’ to match opening ‘)’ at
         {
             // Precisa de tratamento de erro num grau de recursão acima para as
-            // colunas. Por isso o 70.
+            // colunas, por isso o 70.
             return 70;
         }
 
@@ -240,10 +199,12 @@ int parsing( const std::string & bunparsed, int & column ){
             return 2;
         }
 
-        // Passo recursivo dos parênteses.
+        /////// Passo recursivo dos parênteses ///////
         else if ( bunparsed[i] == '(' ){
+            termQueue.enqueue( Term( std::string( 1, '(' ), false, false ) );
+
             int oldColumn = column;
-            int error = parsing( bunparsed.substr( i + 1 ), ++column );
+            int error = parseAndTokenize( termQueue, bunparsed.substr( i + 1 ), ++column );
             if ( error == 70 ){
                 column = oldColumn;
                 return 7;
@@ -256,55 +217,54 @@ int parsing( const std::string & bunparsed, int & column ){
 
             continue;
 
-        // Não precisa de needsClosingBraces pois o erro foi tratada acima.
+        // Não precisa de needsClosingBraces pois o erro foi tratado acima.
         } else if ( bunparsed[i] == ')' ){
+            termQueue.enqueue( Term( std::string( 1, ')' ), false, false ) );
             return 0;
         }
 
-        // Continua se normal
-        else {
-
-            if ( isdigit( bunparsed[i] ) ) // Número
-            {
+        /////// Continua se normal ///////
+        else if ( isdigit( bunparsed[i] ) ) // Número
+        {
+            number += bunparsed[i];
+            while ( isdigit( bunparsed[ i+1 ] ) ){
+                i++; column++;
                 number += bunparsed[i];
-                while ( isdigit( bunparsed[ i+1 ] ) ){
-                    i++; column++;
-                    number += bunparsed[i];
-                }
-
-                // Erros de compilação provavelmente serão jogados abaixo.
-                if ( isOutOfBounds( pow( -1, negUnaries ) * stoi( number ) ) ) // 1. Numeric constant out of range
-                {
-                    column += 1 - number.size() - negUnaries - posUnaries;
-                    return 1;
-                }
-
-                number = "";
-                negUnaries = 0;
-                posUnaries = 0;
-                previouslyWasNumber = true;
             }
-            else // Operadores
+
+            if ( isOutOfBounds( pow( -1, negUnaries ) * stoi( number ) ) ) // 1. Numeric constant out of range
             {
-                if ( !previouslyWasNumber ) // Unários
-                {
-                    if ( bunparsed[i] == '-' )
-                        negUnaries++;
-                    // A comparação abaixo é teoricamente desnecessário pois se
-                    // não há a possibilidade de erros, a única outra escolha
-                    // seria o unário '+'
-                    else /* if ( bunparsed[i] == '+' ) */
-                        posUnaries++;
-                }
-                else // Binários
-                {
-                    previouslyWasNumber = false;
-                }
+                column += 1 - number.size() - negUnaries - posUnaries;
+                return 1;
             }
 
-//            std::cout << ">>> We're at column " << column << ", no errors found yet.\n";
+            termQueue.enqueue( Term( number, false, false ) );
 
+            number = "";
+            negUnaries = 0;
+            posUnaries = 0;
+            previouslyWasNumber = true;
         }
+        else // Operadores
+        {
+            if ( !previouslyWasNumber ) // Unários
+            {
+                termQueue.enqueue( Term( std::string( 1, bunparsed[i] ), true, true ) );
+
+                if ( bunparsed[i] == '-' )
+                    negUnaries++;
+                else /* if ( bunparsed[i] == '+' ) */
+                    posUnaries++;
+            }
+            else // Binários
+            {
+                termQueue.enqueue( Term( std::string( 1, bunparsed[i] ), true, false ) );
+
+                previouslyWasNumber = false;
+            }
+        }
+
+//        std::cout << ">>> We're at column " << column << ", no errors found yet.\n";
     }
 
     // Tenho operador e acaba a linha
@@ -328,8 +288,6 @@ int parsing( const std::string & bunparsed, int & column ){
     // Devem haver um número igual de parênteses (Fechado extra)
     // Não podem haver dois operadores seguidos
     // Devem haver um número igual de parênteses (Fechado falta)
-
-    // Parênteses podem ser lindamente parsados com stacks.
 
     // Aprendizados:
        // Número -> Símbolo || ')'

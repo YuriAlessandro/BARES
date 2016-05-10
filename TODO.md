@@ -5,14 +5,18 @@
 cleans pra dar destroy (como visto naquela aula de LP).
 - Tokenização [DONE].
 - Parsing [DONE].
+- Parsing que Tokeniza [DONE].
 
 #### Yuri
+- Começou a transformação para pós-fixo.
 - Fez um arquivo legal pra FMC2.
 
 ## TODO
 - O Makefile (Pra aprender logo de uma vez).
 - O MAKEFILE.
-- Fazer o Parsing tokenizar.
+- O Makefile, serião.
+- Começar a comentar no estilo Doxygen.
+- Organizar o programa em .h's e partes que fazem sentido.
 - Mover a Tokenização para uma classe que ainda nem existe?
 - Transformação em notação polonesa.
 - A parte da calculadora que calcula (a calculadora em si).
@@ -29,6 +33,12 @@ já fizeram na nossa frente).
 - Identificar a coluna dos erros será um problema ~~grande e chato~~. ~~Mentiraaa!~~
 Mentira de novo. Pela complexidade dos erros, o melhor é fazer mesmo uma função de
 parsing que aja antes da tokenização (pois a mesma apaga espaços e etc) [EM PROGRESSO].
+- Você sabe (ou acha) que tá com tempo extra quando tem uma seção chamada "Opcionais"
+
+## Opcionais
+- Fazer os MakeEmpty de ambas as TADs darem destroy nos objetos (para paz de espírito)
+- Uma forma mais sofisticada de jogar os erros.
+
 
 ## Dúvidas
 - Ordem dos erros ( (3 +d) é E2? E (3 += 4)? )
