@@ -16,6 +16,10 @@ public:
         return mbIsOperator;
     }
 
+    bool isUnary( void ){
+        return mbIsUnary;
+    }
+    
 private:
     std::string msValue;
     bool mbIsOperator;

@@ -75,10 +75,11 @@ public:
         m_queue[ m_back ] = x;
     }
 
-    Object dequeue( ){
+    bool dequeue( const Object & _value ){
 
-        if ( isEmpty() )
-            throw std::out_of_range ("[dequeue()]: Sem elementos na fila");
+        if ( isEmpty() ){
+            return false;
+        }
 
         int _oldFront = m_front;
 
@@ -89,7 +90,10 @@ public:
         }else{
             m_front = ( m_front + 1 ) % m_capacity;
         }
-        return m_queue[ _oldFront ];
+
+        _value = m_queue[ _oldFront ]
+        
+        return true;
     }
 
     Object getFront( ) const{
