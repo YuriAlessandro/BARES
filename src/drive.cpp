@@ -2,9 +2,16 @@
 #include <iomanip>
 #include <cstdlib>
 #include <fstream>
+#include <cctype>
 #include <cmath>
 #include "queuear.h"
 #include "term.h"
+
+bool validOperator( const char & op );
+bool isUnary( const char & op );
+bool isOperand( const char & op );
+bool isOutOfBounds( const int & num );
+int parsing( const std::string & bunparsed, int & column );
 
 // Em breve será completamente alterado.
 int main(int argc, char* argv[])
@@ -13,7 +20,7 @@ int main(int argc, char* argv[])
     // é um mistério.
     QueueAr<Term> terms;
 
-	std::string fileName = "test.txt";
+	std::string fileName = "EXIT.txt";
 
 	/* Avisa para o usuário que o arquivo será lido.*/
 	std::cout << ">>> Preparing to read bet file [" << fileName << "], please wait...\n";
@@ -27,16 +34,24 @@ int main(int argc, char* argv[])
     	return EXIT_FAILURE;
     }
 
+
     // Definitivamente bem melhor agora, porém o (file >> temp) ignora espaços e
     // símbolos de nova linha, então talvez seja melhor simplesmente usar um
     // getline e trabalhar em cima disso.
     std::string currentLine;
-    std::string number;
-    int column = 0;
+    int column;
+    int errorId;
 
     // Loop do arquivo
 	while ( std::getline( file, currentLine ) ){
+        column = 1;
+        errorId = parsing( currentLine, column );
 
+        if ( errorId )
+            std::cout << "E" << errorId << " " << column << "\n";
+        else
+            std::cout << "OK" << "\n";
+/*
         // Loop da linha
 	    for ( char temp : currentLine )
 	    {
@@ -71,10 +86,11 @@ int main(int argc, char* argv[])
 
 	    // Coloca no stack quando termina de ler uma linha para testar
 	    // terms.enqueue( Term( "Testing purposes", false ) );
+*/
 	}
 
 	file.close();
-
+/*
     // Teste
     std::cout << "\n[ ";
     while ( !terms.isEmpty() ){
@@ -82,7 +98,7 @@ int main(int argc, char* argv[])
         std::cout << printingTerm.getValue() << " ";
     }
     std::cout << "]\n";
-
+*/
 
     return 0;
 }
@@ -137,6 +153,23 @@ column = 20
 // (3 + 4)(5 * 5) ainda são corretas (na verdade tudo é), então lembrar de modificar
 // os booleanos na volta da recursão.
 
+bool validOperator( const char & op ){
+    return ( op == '+' ) or ( op == '-' ) or ( op == '*' ) or
+    ( op == '/' ) or ( op == '^' ) or ( op == '%' );
+}
+
+bool isUnary( const char & op ){
+    return ( op == '+' ) or ( op == '-' );
+}
+
+bool isOperand( const char & op ){
+    return isdigit( op ) or ( op == '(' );
+}
+
+bool isOutOfBounds( const int & num ){
+    return ( num < -32768 ) or ( num > 32767 );
+}
+
 // Trocar "expects" para "previouslyWasNumber"
 int parsing( const std::string & bunparsed, int & column ){
 
@@ -147,22 +180,22 @@ int parsing( const std::string & bunparsed, int & column ){
     bool previouslyWasNumber = false;
     int negUnaries = 0;
     int posUnaries = 0;
-    //bool isEmpty = true;
 
     // Necessário para a lógica de parêntese
     bool needsClosingBraces = !( column == 1 );
+    //std::cout << "needsClosingBraces: " << needsClosingBraces << "\n";
 
     // i representa a coluna da substring atual
-    for ( int i = 0; i < bunparsed.size(); i++, column++ ) {
+    for ( auto i = 0u; i < bunparsed.size(); i++, column++ ) {
         // Pula espaços e tabs (whitespace)
-        if ( bunparsed[i] == ' ' or bunparsed[i] == '  ' ) continue;
+        if ( bunparsed[i] == ' ' or bunparsed[i] == '\t' ) continue;
 
         // TODO INTERNO:
         // Implementar já a inserção numa fila de saída porque tá muito na cara
 
         // Tratamento dos erros
         // Precisa de ')' e não tem ')'
-        if ( needsClosingBraces and i+1 = bunparsed.size() and ( bunparsed[i] != ')' ) ) // 7. Missing closing ‘)’ to match opening ‘)’ at
+        if ( needsClosingBraces and ( i+1 == bunparsed.size() ) and ( bunparsed[i] != ')' ) ) // 7. Missing closing ‘)’ to match opening ‘)’ at
         {
             // Precisa de tratamento de erro num grau de recursão acima para as
             // colunas. Por isso o 70.
@@ -188,15 +221,15 @@ int parsing( const std::string & bunparsed, int & column ){
         }
 
         // Tenho número e vem algo estranho
-        else if ( previouslyWasNumber and !validOperator( bunparsed[i] ) ) // 3. Invalid operand
+        else if ( previouslyWasNumber and !validOperator( bunparsed[i] ) and ( bunparsed[i] != ')' ) ) // 3. Invalid operand
         {
             return 3;
         }
 
-        // Os último caso pode se preocupar com menos caso, pois já foram tratados acima
         // Não precisa de !validOperator pois já foi tratado em Lost Operator
         // Tenho operador e vem algo estranho
-        else if ( !previouslyWasNumber and !isOperand( bunparsed[i] ) and !isUnary( bunparsed[i] ) ) // 2. Ill-formed expression
+        else if ( !previouslyWasNumber and !isOperand( bunparsed[i] )
+        and !isUnary( bunparsed[i] ) and ( bunparsed[i] != ')' ) ) // 2. Ill-formed expression
         {
             return 2;
         }
@@ -246,6 +279,7 @@ int parsing( const std::string & bunparsed, int & column ){
                     return 1;
                 }
 
+                number = "";
                 negUnaries = 0;
                 posUnaries = 0;
                 previouslyWasNumber = true;
@@ -268,7 +302,7 @@ int parsing( const std::string & bunparsed, int & column ){
                 }
             }
 
-            std::cout << ">>> We're at column " << column << ", no errors found yet.\n";
+//            std::cout << ">>> We're at column " << column << ", no errors found yet.\n";
 
         }
     }
@@ -317,25 +351,6 @@ int parsing( const std::string & bunparsed, int & column ){
        // Isso, para compensar pelos '(' e ')' pulados.
 
     //[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[ Lógica acima ]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]
-
-}
-
-bool validOperator( const char & op ){
-    return ( op == '+' ) or ( op == '-' ) or ( op == '*' ) or
-           ( op == '/' ) or ( op == '^' ) or ( op == '%' );
-}
-
-bool isUnary( const char & op ){
-    return ( op == '+' ) or ( op == '-' );
-}
-
-bool isOperand( const char & op ){
-    return isdigit( op ) or ( op == '(' );
-}
-
-bool isOutOfBounds( const int & num ){
-    return ( num < -32768 ) or ( num > 32767 );
-}
 
 /*
 [WARNING] TEST AREA [WARNING]

@@ -4,7 +4,7 @@
 - Copiei o Stack template que já tinha feito, mas tem que modificar os pops e os
 cleans pra dar destroy (como visto naquela aula de LP).
 - Tokenização [DONE].
-- Parsing [DONE?].
+- Parsing [DONE].
 
 #### Yuri
 - Fez um arquivo legal pra FMC2.
@@ -41,5 +41,6 @@ parsing que aja antes da tokenização (pois a mesma apaga espaços e etc) [EM P
 - 3 ) 4 -> é E3 ou E5?
 - 3 + ) -> é E3 ou E5?
 - 2 + ( -> é E2 ou E7?
+- 3 + ( ) -> Erro em qual coluna?
 - Na calculadora, nós temos que converter os operadores em "operações" ou faz
 com algo estilo switch case?
