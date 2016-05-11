@@ -65,23 +65,22 @@ public:
 
     //////// FUNÇÕES BÁSICAS ////////
     void enqueue( const Object & x ){
+        if ( ( m_back + 1 ) % m_capacity == m_front )
+            this->resize();
+
         if ( m_front == -1 )
             m_front = 0;
-
-        if ( ( m_back != -1 ) and ( m_back + 1 ) % m_capacity == m_front )
-            this->resize();
 
         m_back = ( m_back + 1 ) % m_capacity;
         m_queue[ m_back ] = x;
     }
 
-    bool dequeue( const Object & _value ){
+    bool dequeue( Object & _value ){
 
-        if ( isEmpty() ){
+        if ( isEmpty() )
             return false;
-        }
 
-        int _oldFront = m_front;
+        _value = m_queue[ m_front ];
 
         // Caso especial
         if ( m_front == m_back ){
@@ -91,8 +90,6 @@ public:
             m_front = ( m_front + 1 ) % m_capacity;
         }
 
-        _value = m_queue[ _oldFront ]
-        
         return true;
     }
 
@@ -111,7 +108,7 @@ public:
         m_front = -1;
         m_back = -1;
     }
-    
+
 };
 
 #endif

@@ -8,18 +8,18 @@ public:
     msValue( _sValue ), mbIsOperator( _bIsOperator ), mbIsUnary( _bIsUnary )
     {}
 
-    std::string getValue( void ){
+    std::string getValue( void ) const{
         return msValue;
     }
 
-    bool isOperator( void ){
+    bool isOperator( void ) const{
         return mbIsOperator;
     }
 
-    bool isUnary( void ){
+    bool isUnary( void ) const{
         return mbIsUnary;
     }
-    
+
 private:
     std::string msValue;
     bool mbIsOperator;

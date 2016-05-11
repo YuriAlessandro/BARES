@@ -7,7 +7,7 @@ public:
 
     // Basic members
     virtual void enqueue( const Object & x ) = 0;
-    virtual Object dequeue() = 0;
+    virtual bool dequeue( Object & _value ) = 0;
     virtual Object getFront() const = 0;
 
     virtual bool isEmpty() const = 0;

@@ -6,6 +6,7 @@
 #include <cmath>
 #include "queuear.h"
 #include "term.h"
+#include "stackar.h"
 
 #define FILENAME "test"
 
@@ -14,12 +15,13 @@ bool isUnary( const char & op );
 bool isOperand( const char & op );
 bool isOutOfBounds( const int & num );
 int parseAndTokenize( QueueAr<Term> & termQueue, const std::string & bunparsed, int & column );
-void to_posfix( std::vector<Term> operation );
+void to_posfix( QueueAr<Term> & operation, QueueAr<Term> & posfix );
 
 int main(int argc, char* argv[])
 {
     std::string fileName;
     QueueAr<Term> terms;
+    QueueAr<Term> posfixTest;
 
     if ( argc > 1 )
         fileName = argv[1];
@@ -53,19 +55,23 @@ int main(int argc, char* argv[])
         if ( errorId ){
             std::cout << "E" << errorId << " " << column << "\n";
         } else {
-            
+
             // Toda a parte da calculadora virá aqui.
+
+            to_posfix( terms, posfixTest );
 
             // Teste
             std::cout << "[ ";
-            while ( !terms.isEmpty() ){
-                Term printingTerm = terms.dequeue();
+            while ( !posfixTest.isEmpty() ){
+                Term printingTerm;
+                posfixTest.dequeue( printingTerm );
                 std::cout << printingTerm.getValue() << " ";
             }
             std::cout << "]\n";
 
         }
 
+        posfixTest.makeEmpty();
         terms.makeEmpty();
 
 	}
@@ -333,36 +339,44 @@ int parseAndTokenize( QueueAr<Term> & termQueue, const std::string & bunparsed, 
 
 */
 
-int precedence( Term symbol ){
+// Me coçando pra passar string ao invés de term e não ter que chamar getValue()
+// 10000 vezes. "Muh performance!"
+int precedence( const Term & symbol ){
     if ( symbol.getValue() == "+" or symbol.getValue() == "-") return 0;
     else if ( symbol.getValue() == "*" or symbol.getValue() == "/" or symbol.getValue() == "%" ) return 1;
     else if ( symbol.getValue() == "^" ) return 2;
+    else return -1;
 }
 
-QueueAr<Term> to_posfix( QueueAr<Term> operation ){
+// 3 + 4 * 5
+// 3 4 5 * +
+
+// 3 * ( 4 + 5 ) * 3
+
+// 3 + 4 + 5 * 6
+// 3 4 5 6 * + +
+
+void to_posfix( QueueAr<Term> & operation, QueueAr<Term> & posfix ){
 
     StackAr<Term> operators;
     StackAr<Term> parentheses;
 
-    QueueAr<Term> posfix;
-
     Term temp;
 
-    int j = 0;
-    
     while ( operation.dequeue( temp ) ){
-   
+
         // Se for um operador:
         if( temp.isOperator() ){
-            
+
             // Caso seja o primeiro operador, ele é adicionado a pilha de operadores.
             if ( operators.isEmpty() and parentheses.isEmpty() )
                 operators.push( temp );
-            
+
             // Se não tiver parenteses abertos, tira os operadores de maior precedência que tão e adiciona esse novo.
             else if ( parentheses.isEmpty() ){
-                
-                while ( precedence( temp ) >= precedence ( operators.top() ) ){
+
+                // Você não pode ver o topo sem antes checar se está ou não vazio
+                while ( !operators.isEmpty() and  precedence( temp ) < precedence ( operators.top() ) ){
                     posfix.enqueue( operators.pop( ) );
                 }
                 operators.push( temp );
@@ -370,19 +384,20 @@ QueueAr<Term> to_posfix( QueueAr<Term> operation ){
 
             // Adiciona a pilha de operadores se tiver parentêses abertos
             else operators.push( temp );
-        } 
-        
+        }
+
         // Se forem paretêses:
-        else if ( symbol.getValue() == "(" ) parentheses.push( temp );
-        else if ( symbol.getValue() == ")" ) parentheses.pop();
-            
+        else if ( temp.getValue() == "(" ) parentheses.push( temp );
+        else if ( temp.getValue() == ")" ) parentheses.pop();
+
         // Se for um número ou simbolo unário, adiciona direto ao posfixo:
         else posfix.enqueue( temp );
 
-}
+
+    }
+
     // Coloca os simbolos que sobraram de parenteses no final do posfixo.
     while ( ! operators.isEmpty() )
         posfix.enqueue( operators.pop() );
 
-    return posfix;
 }
