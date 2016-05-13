@@ -357,10 +357,11 @@ int precedence( const Term & symbol ){
 // 3 + 4 + 5 * 6
 // 3 4 5 6 * + +
 
-void to_posfix( QueueAr<Term> & operation, QueueAr<Term> & posfix ){
+void to_postfix( QueueAr<Term> & operation, QueueAr<Term> & posfix ){
 
     StackAr<Term> operators;
     StackAr<Term> parentheses;
+    
 
     Term temp;
 
