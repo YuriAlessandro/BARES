@@ -342,10 +342,11 @@ int parseAndTokenize( QueueAr<Term> & termQueue, const std::string & bunparsed, 
 // Me coçando pra passar string ao invés de term e não ter que chamar getValue()
 // 10000 vezes. "Muh performance!"
 int precedence( const Term & symbol ){
-    if ( symbol.getValue() == "+" or symbol.getValue() == "-") return 0;
-    else if ( symbol.getValue() == "*" or symbol.getValue() == "/" or symbol.getValue() == "%" ) return 1;
-    else if ( symbol.getValue() == "^" ) return 2;
-    else return -1;
+    if ( symbol.getValue() == "+" or symbol.getValue() == "-") return 5;
+    else if ( symbol.getValue() == "*" or symbol.getValue() == "/" or symbol.getValue() == "%" ) return 4;
+    else if ( symbol.getValue() == "^" ) return 3;
+    else if ( symbol.getValue() == "@m" or symbol.getValue() == "@p" ) return 2;
+    else return 1;
 }
 
 // 3 + 4 * 5
@@ -365,34 +366,37 @@ void to_posfix( QueueAr<Term> & operation, QueueAr<Term> & posfix ){
 
     while ( operation.dequeue( temp ) ){
 
-        // Se for um operador:
-        if( temp.isOperator() ){
-
-            // Caso seja o primeiro operador, ele é adicionado a pilha de operadores.
-            if ( operators.isEmpty() and parentheses.isEmpty() )
-                operators.push( temp );
-
-            // Se não tiver parenteses abertos, tira os operadores de maior precedência que tão e adiciona esse novo.
-            else if ( parentheses.isEmpty() ){
-
-                // Você não pode ver o topo sem antes checar se está ou não vazio
-                while ( !operators.isEmpty() and  precedence( temp ) < precedence ( operators.top() ) ){
-                    posfix.enqueue( operators.pop( ) );
-                }
-                operators.push( temp );
+        //Se for paranteses:
+        if ( temp == "(" )
+            operators.push( temp );
+        
+        else if ( temp == ")" ){
+            while ( !operators.isEmpty() and operators.top() != "("){
+                posfix.enqueue( operators.pop( ) );
             }
-
-            // Adiciona a pilha de operadores se tiver parentêses abertos
-            else operators.push( temp );
+            if ( operators.top() == "(" )
+                operators.pop();
         }
 
-        // Se forem paretêses:
-        else if ( temp.getValue() == "(" ) parentheses.push( temp );
-        else if ( temp.getValue() == ")" ) parentheses.pop();
+        // Se for um operador:
+        else if( temp.isOperator() or temp.isUnary() ){
 
-        // Se for um número ou simbolo unário, adiciona direto ao posfixo:
-        else posfix.enqueue( temp );
+            // Caso seja o primeiro operador, ele é adicionado a pilha de operadores.
+            if ( operators.isEmpty() )
+                operators.push( temp );
 
+            else if ( operators.top() == "(" )
+                operators.push ( temp );
+            
+            else{
+                while ( !operators.isEmpty() and  precedence( temp ) < precedence ( operators.top() ) )
+                    posfix.enqueue( operators.pop( ) );
+                operators.push( temp );
+            }
+        }
+        // Se for número
+        else
+            posfix.enqueue( temp );
 
     }
 
