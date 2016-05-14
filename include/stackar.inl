@@ -46,7 +46,7 @@ template<typename Object>
 void StackAr<Object>::makeEmpty(){
 	m_top = 0;
 }
-
+/*
 template<typename Object>
 void StackAr<Object>::debug(){
 	std::cout << "[ " << " ";
@@ -54,3 +54,4 @@ void StackAr<Object>::debug(){
 		std::cout << m_stack[i].getValue() << " ";
 	std::cout << "]" << "\n";
 }
+*/

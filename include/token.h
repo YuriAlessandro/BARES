@@ -1,10 +1,10 @@
 #ifndef _TERM_H_
 #define _TERM_H_
 
-class Term
+class Token
 {
 public:
-    Term( std::string _sValue = "0", bool _bIsOperator = 0, bool _bIsUnary = 0) :
+    Token( std::string _sValue = "0", bool _bIsOperator = 0, bool _bIsUnary = 0) :
     msValue( _sValue ), mbIsOperator( _bIsOperator ), mbIsUnary( _bIsUnary )
     {}
 

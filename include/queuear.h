@@ -108,14 +108,14 @@ public:
         m_front = -1;
         m_back = -1;
     }
-
+/*
     void debug() {
         std::cout << "[ " << " ";
     	for (int i = 0; i < m_capacity; i++ )
     		std::cout << m_queue[i].getValue() << " ";
     	std::cout << "]" << "\n";
     }
-
+*/
 };
 
 #endif

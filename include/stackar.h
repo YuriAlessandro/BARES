@@ -34,7 +34,7 @@ class StackAr : public AbsStack<Object>
 
 	bool isEmpty() const;
 	void makeEmpty();
-	void debug();
+//	void debug();
 
 
 };
