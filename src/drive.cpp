@@ -15,7 +15,8 @@ bool isUnary( const char & op );
 bool isOperand( const char & op );
 bool isOutOfBounds( const int & num );
 int parseAndTokenize( QueueAr<Term> & termQueue, const std::string & bunparsed, int & column );
-void to_posfix( QueueAr<Term> & operation, QueueAr<Term> & posfix );
+// Esvazia operation e preenche posfix
+void toPostfix( QueueAr<Term> & operation, QueueAr<Term> & posfix );
 
 int main(int argc, char* argv[])
 {
@@ -56,11 +57,19 @@ int main(int argc, char* argv[])
             std::cout << "E" << errorId << " " << column << "\n";
         } else {
 
-            // Toda a parte da calculadora virá aqui.
+            toPostfix( terms, posfixTest
 
-            to_posfix( terms, posfixTest );
+            /* Teste Comum
+            std::cout << "[ ";
+            while ( !terms.isEmpty() ){
+            Term printingTerm;
+            terms.dequeue( printingTerm );
+            std::cout << printingTerm.getValue() << " ";
+            }
+            std::cout << "]\n";
+            */
 
-            // Teste
+            // Teste postfix
             std::cout << "[ ";
             while ( !posfixTest.isEmpty() ){
                 Term printingTerm;
@@ -68,18 +77,16 @@ int main(int argc, char* argv[])
                 std::cout << printingTerm.getValue() << " ";
             }
             std::cout << "]\n";
+            /**/
+
+            // Falta somente a calculadora
 
         }
 
         posfixTest.makeEmpty();
-        terms.makeEmpty();
-
 	}
 
 	file.close();
-/*
-
-*/
 
     return 0;
 }
@@ -256,12 +263,13 @@ int parseAndTokenize( QueueAr<Term> & termQueue, const std::string & bunparsed, 
         {
             if ( !previouslyWasNumber ) // Unários
             {
-                termQueue.enqueue( Term( std::string( 1, bunparsed[i] ), true, true ) );
-
-                if ( bunparsed[i] == '-' )
+                if ( bunparsed[i] == '-' ){
+                    termQueue.enqueue( Term( "@m", true, true ) );
                     negUnaries++;
-                else /* if ( bunparsed[i] == '+' ) */
+                } else /* if ( bunparsed[i] == '+' ) */ {
+                    termQueue.enqueue( Term( "@p", true, true ) );
                     posUnaries++;
+                }
             }
             else // Binários
             {
@@ -342,11 +350,11 @@ int parseAndTokenize( QueueAr<Term> & termQueue, const std::string & bunparsed, 
 // Me coçando pra passar string ao invés de term e não ter que chamar getValue()
 // 10000 vezes. "Muh performance!"
 int precedence( const Term & symbol ){
-    if ( symbol.getValue() == "+" or symbol.getValue() == "-") return 5;
-    else if ( symbol.getValue() == "*" or symbol.getValue() == "/" or symbol.getValue() == "%" ) return 4;
-    else if ( symbol.getValue() == "^" ) return 3;
-    else if ( symbol.getValue() == "@m" or symbol.getValue() == "@p" ) return 2;
-    else return 1;
+    if ( symbol.getValue() == "@m" or symbol.getValue() == "@p" ) return 1;
+    else if ( symbol.getValue() == "^" ) return 2;
+    else if ( symbol.getValue() == "*" or symbol.getValue() == "/" or symbol.getValue() == "%" ) return 3;
+    else if ( symbol.getValue() == "+" or symbol.getValue() == "-") return 4;
+    else return 5;
 }
 
 // 3 + 4 * 5
@@ -357,44 +365,38 @@ int precedence( const Term & symbol ){
 // 3 + 4 + 5 * 6
 // 3 4 5 6 * + +
 
-void to_postfix( QueueAr<Term> & operation, QueueAr<Term> & posfix ){
+void toPostfix( QueueAr<Term> & operation, QueueAr<Term> & posfix ){
 
     StackAr<Term> operators;
-    StackAr<Term> parentheses;
-    
 
     Term temp;
 
     while ( operation.dequeue( temp ) ){
 
         //Se for paranteses:
-        if ( temp == "(" )
+        if ( temp.getValue() == "(" )
             operators.push( temp );
-        
-        else if ( temp == ")" ){
-            while ( !operators.isEmpty() and operators.top() != "("){
+
+        else if ( temp.getValue() == ")" ){
+            //operators.debug();
+            while ( !operators.isEmpty() and operators.top().getValue() != "(")
                 posfix.enqueue( operators.pop( ) );
-            }
-            if ( operators.top() == "(" )
-                operators.pop();
+
+            operators.pop();
         }
 
         // Se for um operador:
-        else if( temp.isOperator() or temp.isUnary() ){
+        else if( temp.isOperator() ){
 
-            // Caso seja o primeiro operador, ele é adicionado a pilha de operadores.
-            if ( operators.isEmpty() )
-                operators.push( temp );
+            while ( !operators.isEmpty() and
+            precedence( temp ) >= precedence ( operators.top() ) and
+            !( temp.isUnary() and operators.top().isUnary() ) )
+                posfix.enqueue( operators.pop( ) );
 
-            else if ( operators.top() == "(" )
-                operators.push ( temp );
-            
-            else{
-                while ( !operators.isEmpty() and  precedence( temp ) < precedence ( operators.top() ) )
-                    posfix.enqueue( operators.pop( ) );
-                operators.push( temp );
-            }
+            operators.push( temp );
+
         }
+
         // Se for número
         else
             posfix.enqueue( temp );
@@ -404,5 +406,4 @@ void to_postfix( QueueAr<Term> & operation, QueueAr<Term> & posfix ){
     // Coloca os simbolos que sobraram de parenteses no final do posfixo.
     while ( ! operators.isEmpty() )
         posfix.enqueue( operators.pop() );
-
 }
