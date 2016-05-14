@@ -1,28 +1,31 @@
 ## DONE
 ### Insira seu progresso abaixo
 #### Gustavo
-- Copiei o Stack template que já tinha feito, mas tem que modificar os pops e os
-cleans pra dar destroy (como visto naquela aula de LP).
-- Tokenização [DONE].
-- Parsing [DONE].
-- Parsing que Tokeniza [DONE].
+- Copiei o Stack e Fila template feitos anteriormente.
+- Tokenização.
+- Parsing.
+- Parsing que Tokeniza.
 
 #### Yuri
-- Começou a transformação para pós-fixo.
+- Transformação para pós-fixo.
 - Fez um arquivo legal pra FMC2.
 
 ## TODO
-- O Makefile (Pra aprender logo de uma vez).
-- O MAKEFILE.
-- O Makefile, serião.
-- Começar a comentar no estilo Doxygen.
-- Organizar o programa em .h's e partes que fazem sentido.
-- Mover a Tokenização para uma classe que ainda nem existe?
-- Transformação em notação polonesa.
-- A parte da calculadora que calcula (a calculadora em si).
+- [x] Tokenização.
+- [x] Parsing.
+- [x] Parsing que Tokeniza.
+- [x] O Makefile (Pra aprender logo de uma vez).
+- [x] O MAKEFILE.
+- [x] O Makefile, serião.
+- [ ] Fazer o Makefile notar mudanças nos .h
+- [ ] Começar a comentar no estilo Doxygen.
+- [x] Organizar o programa em .h's e partes que fazem sentido.
+- [ ] Mover a Tokenização para uma classe que ainda nem existe?
+- [x] Transformação em notação polonesa.
+- [ ] A parte da calculadora que calcula (a calculadora em si).
 
 ## Planejamento
-- Uma classe para os operandos e operadores (Term (Trocar esse nome)) e outra
+- Uma classe para os operandos e operadores e outra
 para a sequência deles (Provavelmente Expression pra invejar os amiguinhos que
 já fizeram na nossa frente).
 - Possivelmente uma classe para erros (Aroma de functors no ar(?)).
@@ -32,7 +35,7 @@ já fizeram na nossa frente).
 - Alguns erros são melhores tratados no parsing, e outros na transformação.
 - Identificar a coluna dos erros será um problema ~~grande e chato~~. ~~Mentiraaa!~~
 Mentira de novo. Pela complexidade dos erros, o melhor é fazer mesmo uma função de
-parsing que aja antes da tokenização (pois a mesma apaga espaços e etc) [EM PROGRESSO].
+parsing que aja antes da tokenização (pois a mesma apaga espaços e etc) [ DONE ;^) ].
 - Você sabe (ou acha) que tá com tempo extra quando tem uma seção chamada "Opcionais"
 
 ## Opcionais
