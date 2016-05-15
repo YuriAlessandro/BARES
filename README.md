@@ -1,5 +1,5 @@
 # BARES #
-Basic Arithmetic Expression Evaluator based on Stacks
+Basic ARithmetic Expression evaluator based on Stacks
 
 ## Autoria
 - Gustavo Carvalho
