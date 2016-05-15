@@ -8,7 +8,8 @@
 
 #### Yuri
 - Transformação para pós-fixo.
-- Fez um arquivo legal pra FMC2.
+- A parte da calculadora que calcula (a calculadora em si)
+- Começar a comentar no estilo Doxygen
 
 ## TODO
 - [x] Tokenização.
@@ -18,11 +19,12 @@
 - [x] O MAKEFILE.
 - [x] O Makefile, serião.
 - [ ] Fazer o Makefile notar mudanças nos .h
-- [ ] Começar a comentar no estilo Doxygen.
+- [  / x] Começar a comentar no estilo Doxygen.
+- [ ] Comentar dentro das funções, melhorar/revisar alguns comentários e comentar as TAD's usadas no estilo Doxygen.
 - [x] Organizar o programa em .h's e partes que fazem sentido.
 - [ ] Mover a Tokenização para uma classe que ainda nem existe?
 - [x] Transformação em notação polonesa.
-- [ ] A parte da calculadora que calcula (a calculadora em si).
+- [x] A parte da calculadora que calcula (a calculadora em si).
 
 ## Planejamento
 - Uma classe para os operandos e operadores e outra

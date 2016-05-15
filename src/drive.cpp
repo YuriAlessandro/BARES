@@ -1,3 +1,13 @@
+/**
+ *  \mainpage BARES
+ *  \author Gustavo Araújo Carvalho e Yuri Alessandro Martins
+ *  \date 2016
+ *  \version 1.0
+ *
+ *  \file drive.cpp
+ *  \brief Contém a função principal do programa.
+ */
+
 #include <iostream>
 #include <fstream>
 #include "functions.h"
@@ -7,6 +17,10 @@
 
 #define FILENAME "test"
 
+/**
+ * Função principal do programa:\n
+ * Executa passos importantes para a leitura do arquivo e chama as funções que irão tratá-lo.\n
+ * Também chama as funções de tratamento de erro e a função de calculadora propriamente dita. */
 int main(int argc, char* argv[])
 {
     std::string fileName;
@@ -32,12 +46,14 @@ int main(int argc, char* argv[])
     	return EXIT_FAILURE;
     }
 
-    // Início do processo de parsing e tokenização
+    /* Início do processo de parsing e tokenização */
     std::string currentLine;
     int column;
     int errorId;
 
-    // Loop do arquivo
+    int res;
+
+    /* Loop do arquivo */
 	while ( std::getline( file, currentLine ) ){
         column = 1;
         errorId = parseAndTokenize( tokens, currentLine, column );
@@ -49,28 +65,15 @@ int main(int argc, char* argv[])
 
             toPostfix( tokens, posfixTest );
 
-            /* Teste Comum
-            std::cout << "[ ";
-            while ( !tokens.isEmpty() ){
-            Token printingToken;
-            tokens.dequeue( printingToken );
-            std::cout << printingToken.getValue() << " ";
-            }
-            std::cout << "]\n";
-            */
+            res = analysis( posfixTest, errorId  );
+            
+            if( errorId == 9 )
+                std::cout << "E9" << std::endl;
+            
+            else if ( errorId == 8 )
+                std::cout << "E8" << std::endl;
 
-            // Teste postfix
-            std::cout << "[ ";
-            while ( !posfixTest.isEmpty() ){
-                Token printingToken;
-                posfixTest.dequeue( printingToken );
-                std::cout << printingToken.getValue() << " ";
-            }
-            std::cout << "]\n";
-            /**/
-
-            // Falta somente a calculadora
-
+            else std::cout << res << std::endl;
         }
 
         posfixTest.makeEmpty();
