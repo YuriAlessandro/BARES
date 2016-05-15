@@ -3,9 +3,6 @@
  * \brief Funcionalidades gerais para o programa.
  */
 
-#include <iostream>
-#include <sstream>
-#include <cmath>
 #include "functions.h"
 
 /*
@@ -35,50 +32,23 @@ Ex.: ((2%3) ∗ 8, coluna 1.
 // Caso o último tokeno seja um parêntese válido, column ficará além dos bounds da string
 // Porém não será um problema mas já será uma expressão válida.
 
-/**
- * Checa se é um operador válido.
- * @param op Char que será analisado.
- * @return True se for um operador válido, False se não.
- */
 bool validOperator( const char & op ){
     return ( op == '+' ) or ( op == '-' ) or ( op == '*' ) or
     ( op == '/' ) or ( op == '^' ) or ( op == '%' );
 }
 
-/**
- * Checa se é um operador unário válido.
- * @param op Char que será analisado.
- * @return True se for um operador unário, False se não.
- */
 bool isUnary( const char & op ){
     return ( op == '+' ) or ( op == '-' );
 }
 
-/**
- * Checa se é um operando válido.
- * @param op Char que será analisado.
- * @return True se for um operando, False se não.
- */
 bool isOperand( const char & op ){
     return isdigit( op ) or ( op == '(' );
 }
 
-/**
- * Checa se o valor inserido está dentro dos limites do programa.
- * @param num Int que será analisado.
- * @return True se está fora da faixa, False se não.
- */
 bool isOutOfBounds( const int & num ){
     return ( num < -32768 ) or ( num > 32767 );
 }
 
-/**
- * Realiza o tratamento de erros e a tokenização das expressões.
- * @param  tokenQueue Fila na qual serão colocados os tokens.
- * @param  bunparsed String que será tokenizada!
- * @param  column Coluna de início!
- * @return O tipo de erro encontrado?
- */
 int parseAndTokenize( QueueAr<Token> & tokenQueue, const std::string & bunparsed, int & column ){
 
     /* Number substring */
@@ -209,8 +179,6 @@ int parseAndTokenize( QueueAr<Token> & tokenQueue, const std::string & bunparsed
                 previouslyWasNumber = false;
             }
         }
-
-//        std::cout << ">>> We're at column " << column << ", no errors found yet.\n";
     }
 
     // Tenho operador e acaba a linha
@@ -220,11 +188,6 @@ int parseAndTokenize( QueueAr<Token> & tokenQueue, const std::string & bunparsed
     return 0; // Para sucesso bem-sucedido.
 }
 
-/**
- * Determina a precedência de um operador.
- * @param symbol Operador a ser analizado.
- * @return Precedência do operador.
- */
 int precedence( const std::string & symbol ){
     if ( symbol == "@m" or symbol == "@p" ) return 1;
     else if ( symbol == "^" ) return 2;
@@ -233,11 +196,6 @@ int precedence( const std::string & symbol ){
     else return 5;
 }
 
-/**
- * Converte uma expressão para o modo posfixo.
- * @param operation Lista com os tokens da expressão.
- * @param posfix Lista onde ficará armazenada a forma posfixa.
- */
 void toPostfix( QueueAr<Token> & operation, QueueAr<Token> & posfix ){
 
     StackAr<Token> operators;
@@ -251,65 +209,55 @@ void toPostfix( QueueAr<Token> & operation, QueueAr<Token> & posfix ){
             operators.push( temp );
 
         else if ( temp.getValue() == ")" ){
-            //operators.debug();
             while ( !operators.isEmpty() and operators.top().getValue() != "(")
                 posfix.enqueue( operators.pop( ) );
 
             operators.pop();
         }
 
-        /* Se for um operador, verifica precedência realiza os passos necessário dentro da pilha de operadores */
+        /* Se for um operador, verifica precedência e realiza os passos
+         * necessários dentro da pilha de operadores */
         else if( temp.isOperator() ){
 
             while ( !operators.isEmpty() and
-            precedence( temp.getValue() ) >= precedence ( operators.top().getValue() )
-            and !( temp.isUnary() and operators.top().isUnary() ) )
+            precedence( temp.getValue() ) >= precedence ( operators.top().getValue() ) and
+            !( temp.isUnary() and operators.top().isUnary() ) )
                 posfix.enqueue( operators.pop( ) );
 
             operators.push( temp );
 
         }
 
-        /* Se for um operando, adiciona diretamente a fila de tokiens em modo posfixo */
+        /* Se for um operando, adiciona diretamente a fila de tokens em modo posfixo */
         else
             posfix.enqueue( temp );
 
     }
 
-    /* Coloca os simbolos que sobraram na pilha de operadores no final do posfixo. */
+    /* Coloca os simbolos que sobraram da pilha de operadores no final do posfixo. */
     while ( ! operators.isEmpty() )
         posfix.enqueue( operators.pop() );
+
 }
 
-/**
- * Analisa uma expressão para chamar a calculadora e computar os resultados.
- * @param posfix Lista com os tokens em formato posfixo.
- * @param errorId Int que determina alguns casos de erro.
- * @return Valor final da expressão.
- */
 int analysis( QueueAr<Token> & posfix, int & errorId ){
     StackAr<int> numbers;
     int a, b;
+    int res;
 
     Token str;
     std::string temp;
 
-    while( !posfix.isEmpty() ){
-        
+    while( posfix.dequeue( str ) ){
+        res = 0;
         errorId = 0;
 
-        posfix.dequeue( str );
         temp = str.getValue();
 
-        int res;
-
         /* Se for número, converte para inteiro e adiciona na pilha de valores */
-        if( isdigit( temp[0] ) ){
-            std::stringstream ss( temp );
-            ss >> a;
-            numbers.push ( a );  
-        }
-        
+        if( isdigit( temp[0] ) )
+            numbers.push ( std::stoi( temp ) );
+
         /* Se for símbolo únario, transforma o número do topo da pilha */
         else if( temp == "@m" ){
             a = numbers.pop( );
@@ -320,14 +268,12 @@ int analysis( QueueAr<Token> & posfix, int & errorId ){
             a *= 1;
             numbers.push( a );
         }
-        
+
         /* Se for operador, retira dois números da pilha e calcula */
         else{
             b = numbers.pop( );
             a = numbers.pop( );
             res = calculator( a, b, temp, errorId );
-            if( isOutOfBounds( res ) )
-                errorId = 9;
             numbers.push( res );
         }
     }
@@ -335,36 +281,38 @@ int analysis( QueueAr<Token> & posfix, int & errorId ){
     return numbers.pop( );
 }
 
-/**
- * Calcula as pequenas partes de uma expressão.
- * @param x Primeiro valor da conta.
- * @param y Segundo valor da conta.
- * @param errorId Int que determina alguns casos de erro.
- * @return Valor final da "sub-expressão".
- */
-int calculator( int x, int y, std::string temp, int & errorId ){
-    if (temp == "+")
-        return x+y;
+int calculator( const int & x, const int & y, const std::string & op, int & errorId ){
+    int res;
 
-    else if (temp == "-")
-        return x-y;
+    switch ( op[0] ){
+        case '+':
+            res = x + y;
+        break;
 
-    else if (temp == "*")
-        return x*y;
+        case '-':
+            res = x - y;
+        break;
 
-    else if (temp == "/"){
-        if ( y != 0 ) return x/y;
-        else{
-            errorId = 8;
-            return 0;
-        } 
+        case '*':
+            res = x * y;
+        break;
+
+        case '/':
+            if ( y != 0 ) res = x / y;
+            else errorId = 8;
+        break;
+
+        case '%':
+            res = x % y;
+        break;
+
+        case '^':
+            res = pow( x, y );
+        break;
     }
 
-    else if (temp == "%")
-        return x%y;
+    if ( isOutOfBounds( res ) )
+        errorId = 9;
 
-    else if (temp == "^")
-        return pow(x,y);
-
-    return 0;
+    return res;
 }

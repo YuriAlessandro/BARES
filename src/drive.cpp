@@ -1,6 +1,7 @@
 /**
  *  \mainpage BARES
- *  \author Gustavo Araújo Carvalho e Yuri Alessandro Martins
+ *  \author Gustavo Araújo Carvalho
+ *  \author Yuri Alessandro Martins
  *  \date 2016
  *  \version 1.0
  *
@@ -15,7 +16,7 @@
 #include "token.h"
 #include "stackar.h"
 
-#define FILENAME "test"
+#define FILENAME "test.txt"
 
 /**
  * Função principal do programa:\n
@@ -32,8 +33,6 @@ int main(int argc, char* argv[])
     else
         fileName = FILENAME;
 
-    fileName += ".txt";
-
 	/* Avisa para o usuário que o arquivo será lido.*/
 	std::cout << ">>> Preparing to read file [" << fileName << "], please wait...\n";
 
@@ -42,7 +41,7 @@ int main(int argc, char* argv[])
 
 	/* Retorna falso se o arquivo não for encontrado. */
 	if( !file.is_open() ){
-        std::cout << "Falha na abertura" << "\n";
+        std::cout << ">>>>Falha na abertura" << std::endl;
     	return EXIT_FAILURE;
     }
 
@@ -54,29 +53,33 @@ int main(int argc, char* argv[])
     int res;
 
     /* Loop do arquivo */
-	while ( std::getline( file, currentLine ) ){
+	while ( std::getline( file, currentLine ) ) {
         column = 1;
         errorId = parseAndTokenize( tokens, currentLine, column );
 
-        if ( errorId ){
-            std::cout << "E" << errorId << " " << column << "\n";
+        /* Em caso de erro: O imprime na tela, faz a limpeza necessária e
+         * continua o loop. */
+        if ( errorId ) {
+            std::cout << "E" << errorId << " " << column << std::endl;
             tokens.makeEmpty();
-        } else {
-
-            toPostfix( tokens, posfixTest );
-
-            res = analysis( posfixTest, errorId  );
-            
-            if( errorId == 9 )
-                std::cout << "E9" << std::endl;
-            
-            else if ( errorId == 8 )
-                std::cout << "E8" << std::endl;
-
-            else std::cout << res << std::endl;
+            continue;
         }
 
-        posfixTest.makeEmpty();
+        /* Transforma em pós-fixo e realiza os cálculos. */
+        toPostfix( tokens, posfixTest );
+        res = analysis( posfixTest, errorId  );
+
+        /* Em caso de erro: O imprime na tela, faz a limpeza necessária e
+         * continua o loop. */
+        if ( errorId ) {
+            std::cout << "E" << errorId << std::endl;
+            posfixTest.makeEmpty();
+            continue;
+        }
+
+        /* Imprime o resultado */
+        std::cout << res << std::endl;
+
 	}
 
 	file.close();

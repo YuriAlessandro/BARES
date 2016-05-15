@@ -1,4 +1,4 @@
->>> Preparing to read bet file [EXIT.txt], please wait...
+>>> Preparing to read file [EXIT.txt], please wait...
 E2 1
 E2 4
 E2 2
@@ -6,17 +6,17 @@ E2 5
 E2 5
 E2 7
 E2 6
-[ - 2 + ( ( ( 3 ) ) ) ]
-[ - + + + + 4 - - - 5 ]
-[ + - + - + - - + 6 ]
+1
+-9
+6
 E1 1
 E5 3
 E5 5
 E2 6
 E2 7
-[ 3 * ( 2 - + 5 % ( 6 / 3 ) + 2 ) ]
-[ 2 ^ 3 * 8 % ( 4 - 6 ) ]
-[ 4 ]
+9
+0
+4
 E2 2
 E2 10
 E2 41
