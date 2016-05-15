@@ -35,7 +35,7 @@ int main(int argc, char* argv[])
     fileName += ".txt";
 
 	/* Avisa para o usuário que o arquivo será lido.*/
-	std::cout << ">>> Preparing to read bet file [" << fileName << "], please wait...\n";
+	std::cout << ">>> Preparing to read file [" << fileName << "], please wait...\n";
 
 	/* Abre o arquivo como somente leitura. */
 	std::ifstream file( fileName );
