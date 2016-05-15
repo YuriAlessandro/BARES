@@ -38,7 +38,7 @@ bool validOperator( const char & op ){
 }
 
 bool isUnary( const char & op ){
-    return ( op == '+' ) or ( op == '-' );
+    return /*( op == '+' ) or*/ ( op == '-' );
 }
 
 bool isOperand( const char & op ){
@@ -57,7 +57,7 @@ int parseAndTokenize( QueueAr<Token> & tokenQueue, const std::string & bunparsed
     /* Necessário para as lógicas de teste */
     bool previouslyWasNumber = false;
     int negUnaries = 0;
-    int posUnaries = 0;
+    /*int posUnaries = 0;*/
 
     /* Necessário para a lógica de parêntese */
     bool needsClosingBraces = !( column == 1 );
@@ -149,7 +149,7 @@ int parseAndTokenize( QueueAr<Token> & tokenQueue, const std::string & bunparsed
 
             if ( isOutOfBounds( pow( -1, negUnaries ) * stoi( number ) ) ) // 1. Numeric constant out of range
             {
-                column += 1 - number.size() - negUnaries - posUnaries;
+                column += 1 - number.size() - negUnaries/* - posUnaries*/;
                 return 1;
             }
 
@@ -157,25 +157,25 @@ int parseAndTokenize( QueueAr<Token> & tokenQueue, const std::string & bunparsed
 
             number = "";
             negUnaries = 0;
-            posUnaries = 0;
+            /*posUnaries = 0;*/
             previouslyWasNumber = true;
         }
         else // Operadores
         {
             if ( !previouslyWasNumber ) /* Unários */
             {
-                if ( bunparsed[i] == '-' ){
-                    tokenQueue.enqueue( Token( "@m", true, true ) );
-                    negUnaries++;
-                } else /* if ( bunparsed[i] == '+' ) */ {
+                /*if ( bunparsed[i] == '-' ){*/
+                tokenQueue.enqueue( Token( "@m", true, true ) );
+                negUnaries++;
+                /* } else if ( bunparsed[i] == '+' ) {
                     tokenQueue.enqueue( Token( "@p", true, true ) );
                     posUnaries++;
                 }
+                */
             }
             else /* Binários */
             {
                 tokenQueue.enqueue( Token( std::string( 1, bunparsed[i] ), true, false ) );
-
                 previouslyWasNumber = false;
             }
         }
@@ -189,7 +189,7 @@ int parseAndTokenize( QueueAr<Token> & tokenQueue, const std::string & bunparsed
 }
 
 int precedence( const std::string & symbol ){
-    if ( symbol == "@m" or symbol == "@p" ) return 1;
+    if ( symbol == "@m" /*or symbol == "@p"*/ ) return 1;
     else if ( symbol == "^" ) return 2;
     else if ( symbol == "*" or symbol == "/" or symbol == "%" ) return 3;
     else if ( symbol == "+" or symbol == "-") return 4;
@@ -248,7 +248,7 @@ int analysis( QueueAr<Token> & posfix, int & errorId ){
     Token str;
     std::string temp;
 
-    while( posfix.dequeue( str ) ){
+    while( posfix.dequeue( str ) and !errorId ){
         res = 0;
         errorId = 0;
 
@@ -263,11 +263,11 @@ int analysis( QueueAr<Token> & posfix, int & errorId ){
             a = numbers.pop( );
             a *= -1;
             numbers.push( a );
-        }else if( temp == "@p" ){
+        }/*else if( temp == "@p" ){
             a = numbers.pop( );
             a *= 1;
             numbers.push( a );
-        }
+        }*/
 
         /* Se for operador, retira dois números da pilha e calcula */
         else{
