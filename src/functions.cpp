@@ -303,7 +303,8 @@ int calculator( const int & x, const int & y, const std::string & op, int & erro
         break;
 
         case '%':
-            res = x % y;
+            if ( y != 0 ) res = x % y;
+            else errorId = 8;
         break;
 
         case '^':
