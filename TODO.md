@@ -12,6 +12,7 @@
 - Começar a comentar no estilo Doxygen
 
 ## TODO
+- [ ] ESCREVER NUM ARQUIVO EXTERNO PORQUE FAZ PARTE DO TRABALHO AAAAAAH
 - [x] Tokenização.
 - [x] Parsing.
 - [x] Parsing que Tokeniza.
@@ -19,7 +20,7 @@
 - [x] O MAKEFILE.
 - [x] O Makefile, serião.
 - [ ] Fazer o Makefile notar mudanças nos .h
-- [  / x] Começar a comentar no estilo Doxygen.
+- [x] Começar a comentar no estilo Doxygen.
 - [ ] Comentar dentro das funções, melhorar/revisar alguns comentários e comentar as TAD's usadas no estilo Doxygen.
 - [x] Organizar o programa em .h's e partes que fazem sentido.
 - [ ] Mover a Tokenização para uma classe que ainda nem existe?
