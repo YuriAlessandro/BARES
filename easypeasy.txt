@@ -1,4 +1,5 @@
-OHOHOHOHO EASY MODO É PARA CRIANCINHAS OHOHOHOHO
+(5+)
+(3+
 3 + 5
 4 * 5 - 6
 6 ^ 4 - 8 * 3
@@ -10,3 +11,4 @@ OHOHOHOHO EASY MODO É PARA CRIANCINHAS OHOHOHOHO
 --6 * -7
 --( 4 + 5 * -( 6 - 7 )) - -8
 -4 + +5 - -6 * --7
+1*2*(3+1+2)+3+(4+5*1)*2-(3-2-1)-4-(6)+2+(3*6)

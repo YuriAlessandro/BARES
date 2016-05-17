@@ -1,11 +1,15 @@
-/**Classe interface pilha (não pode ser instanciada!). */
+/**
+ * \file absstack.h
+ * \brief Classe interface da pilha (não pode ser instanciada).
+ */
+
 template <class Object>
 class AbsStack{
 public:
-	AbsStack() { /* Empty */ } // Default constructor
-	virtual ~AbsStack() { /* Empty */ } // Default destructor
+	AbsStack() { /* Empty */ } 
+	virtual ~AbsStack() { /* Empty */ }
 
-	// Basic members
+	
 	virtual void push( const Object & x ) = 0;
 	virtual Object pop() = 0;
 	virtual Object top() const = 0;
@@ -14,6 +18,9 @@ public:
 	virtual void makeEmpty() = 0;
 
 private:
-	// Disable copy constructor
+	
+	/* 
+	 * \brief Desabilita o construtor cópia.
+	 */
 	AbsStack( const AbsStack & ) { /* Empty */ }
 };

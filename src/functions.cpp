@@ -6,31 +6,14 @@
 #include "functions.h"
 
 /*
-[[[ Erros que precisam ser tratados ]]]
-1. Numeric constant out of range: Um dos operandos da express ̃ao est ́a fora da faixa
-permitida.
-Ex.: 1000000 − 2, coluna 1.
-2. Ill-formed expression or missing token detected: Em alguma parte da expressão está
-faltando um operando ou existe algum operando em formato errado.
-Ex.: 2+, coluna 3; ou 3 ∗ d, coluna 5.
-3. Invalid operand: Existe um sımbolo correspondente a um operador que nao está na
-lista de operadores válidos.
-Ex.: 2 = 3, coluna 3; ou 2.3 + 4, coluna 2.
-4. Extraneous symbol: Aparentemente o programa encontrou um símbolo extra “perdido”
-na expressão.
-Ex.: 2 ∗ 3 4, coluna 7 ou (−3 ∗ 4)(10 ∗ 5), coluna 7.
-5. Mismatch ’)’: Existem um parˆentese fechando sem ter um parˆentese abrindo corres-
-pondente.
-Ex.: )2 − 4, coluna 1; ou 2 − 4), coluna 6; ou 2) − 4. coluna 2.
-6. Lost operator: Apareceu um operador sem seus operandos.
-2 ∗∗ 3, coluna 4; ou /5 ∗ 10, coluna 1.
-7. Missing closing ‘)’ to match opening ‘)’ at: Est ́a faltando um parˆentese de fecha-
-mento ’)’ para um parˆentese de abertura ‘(’ correspondente.
-Ex.: ((2%3) ∗ 8, coluna 1.
+1. Numeric constant out of range:
+2. Ill-formed expression or missing token detected:
+3. Invalid operand:
+4. Extraneous symbol:
+5. Mismatch ’)’:
+6. Lost operator
+7. Missing closing ‘)’ to match opening ‘)’ at:
 */
-
-// Caso o último tokeno seja um parêntese válido, column ficará além dos bounds da string
-// Porém não será um problema mas já será uma expressão válida.
 
 bool validOperator( const char & op ){
     return ( op == '+' ) or ( op == '-' ) or ( op == '*' ) or
@@ -51,64 +34,68 @@ bool isOutOfBounds( const int & num ){
 
 int parseAndTokenize( QueueAr<Token> & tokenQueue, const std::string & bunparsed, int & column ){
 
-    /* Number substring */
+    /* Number substring. */
     std::string number = "";
 
-    /* Necessário para as lógicas de teste */
+    /* Necessário para as lógicas de teste. */
     bool previouslyWasNumber = false;
     int negUnaries = 0;
     /*int posUnaries = 0;*/
 
-    /* Necessário para a lógica de parêntese */
+    /* Necessário para a lógica de parêntese. */
     bool needsClosingBraces = !( column == 1 );
 
-    /* i representa a coluna da substring atual */
+    /* i representa a coluna da substring atual. */
     for ( auto i = 0u; i < bunparsed.size(); i++, column++ ) {
-        /* Pula espaços e tabs (whitespace) */
+        /* Pula espaços e tabs (whitespace). */
         if ( bunparsed[i] == ' ' or bunparsed[i] == '\t' ) continue;
 
         /////// Tratamento dos erros ///////
-        /* Precisa de ')' e não tem ')' */
+        /* Precisa de ')' e não tem ')'. */
         if ( needsClosingBraces and ( i+1 == bunparsed.size() ) and ( bunparsed[i] != ')' ) ) // 7. Missing closing ‘)’ to match opening ‘)’ at
         {
-            /* Precisa de tratamento de erro num grau de recursão acima para as\n
+            /* Ill-Formed Expression tem prioridade no erro. */
+            if ( !previouslyWasNumber )
+                return 2;
+                
+            /* Precisa de tratamento de erro num grau de recursão acima para as
              * colunas, por isso o 70. */
             return 70;
         }
 
-        /* Tenho operador e vem um operador binário conhecido */
+        /* Tenho operador e vem um operador binário conhecido. */
         else if ( !previouslyWasNumber and validOperator( bunparsed[i] ) and !isUnary( bunparsed[i] ) ) // 6. Lost operator
         {
             return 6;
         }
 
-        /* Não precisa de ')' e vem ')' */
+        /* Não precisa de ')' e vem ')'. */
         else if ( !needsClosingBraces and bunparsed[i] == ')' ) // 5. Mismatch ’)’
         {
             return 5;
         }
 
-        /* Tenho número e vem número */
+        /* Tenho número e vem número. */
         else if ( previouslyWasNumber and isOperand( bunparsed[i] ) ) // 4. Extraneous symbol
         {
             return 4;
         }
 
-        /* Tenho número e vem algo estranho */
+        /* Tenho número e vem algo estranho. */
         else if ( previouslyWasNumber and !validOperator( bunparsed[i] ) and ( bunparsed[i] != ')' ) ) // 3. Invalid operand
         {
             return 3;
         }
 
         // Não precisa de !validOperator pois já foi tratado em Lost Operator
-        /* Tenho operador e vem algo estranho */
+        /* Tenho operador e vem algo estranho. */
         else if ( !previouslyWasNumber and !isOperand( bunparsed[i] )
         and !isUnary( bunparsed[i] ) and ( bunparsed[i] != ')' ) ) // 2. Ill-formed expression
         {
             return 2;
         }
 
-        /* Tenho operador e acaba a recursão sem número */
+        /* Tenho operador e acaba a recursão sem número. */
         else if ( !previouslyWasNumber and !isOperand( bunparsed[i] ) and bunparsed[i] == ')' ) // 2. Missing token detected
         {
             return 2;
@@ -118,8 +105,11 @@ int parseAndTokenize( QueueAr<Token> & tokenQueue, const std::string & bunparsed
         else if ( bunparsed[i] == '(' ){
             tokenQueue.enqueue( Token( "(", false, false ) );
 
+            /* Inicia a recursão na substring dentro dos parênteses. */
             int oldColumn = column;
             int error = parseAndTokenize( tokenQueue, bunparsed.substr( i + 1 ), ++column );
+
+            /* Checa por erros e continua a função. */
             if ( error == 70 ){
                 column = oldColumn;
                 return 7;
@@ -132,8 +122,8 @@ int parseAndTokenize( QueueAr<Token> & tokenQueue, const std::string & bunparsed
 
             continue;
 
-        // Não precisa de needsClosingBraces pois o erro foi tratado acima.
         } else if ( bunparsed[i] == ')' ){
+            /* Encerra as recursões de forma bem-sucedida. */
             tokenQueue.enqueue( Token( ")", false, false ) );
             return 0;
         }
@@ -141,20 +131,25 @@ int parseAndTokenize( QueueAr<Token> & tokenQueue, const std::string & bunparsed
         /////// Continua se normal ///////
         else if ( isdigit( bunparsed[i] ) ) // Número
         {
+            
+            /* Continua até receber o número completamente. */
             number += bunparsed[i];
             while ( isdigit( bunparsed[ i+1 ] ) ){
                 i++; column++;
                 number += bunparsed[i];
             }
 
+            /* Verifica pelo erro de OutOfBounds no número encontrado.*/
             if ( isOutOfBounds( pow( -1, negUnaries ) * stoi( number ) ) ) // 1. Numeric constant out of range
             {
                 column += 1 - number.size() - negUnaries/* - posUnaries*/;
                 return 1;
             }
 
+            /* Põe o número final na fila de Tokens. */
             tokenQueue.enqueue( Token( number, false, false ) );
 
+            /* Esvazia number e muda váriaveis de lógica. */
             number = "";
             negUnaries = 0;
             /*posUnaries = 0;*/
@@ -162,6 +157,8 @@ int parseAndTokenize( QueueAr<Token> & tokenQueue, const std::string & bunparsed
         }
         else // Operadores
         {
+            /* Insere na fila caso seja operador e muda variáveis de lógica. */
+            
             if ( !previouslyWasNumber ) /* Unários */
             {
                 /*if ( bunparsed[i] == '-' ){*/
@@ -181,11 +178,11 @@ int parseAndTokenize( QueueAr<Token> & tokenQueue, const std::string & bunparsed
         }
     }
 
-    // Tenho operador e acaba a linha
+    /* Tenho operador e acaba a linha. */
     if ( !previouslyWasNumber )
         return 2;
 
-    return 0; // Para sucesso bem-sucedido.
+    return 0; /* Finaliza sem erros. */
 }
 
 int precedence( const std::string & symbol ){

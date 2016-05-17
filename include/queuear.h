@@ -1,7 +1,12 @@
+/**
+ * \file queuear.h
+ * \brief Implementação de uma TAD fila.
+ */
+
 #ifndef _QUEUEAR_H_
 #define _QUEUEAR_H_
 
-#include "AbsQueue.h"
+#include "absqueue.h"
 #include <stdexcept>
 
 template <typename Object>
@@ -13,8 +18,7 @@ private:
     int m_front;
     int m_back;
 
-    //Apesar de ser um pouco mais complexa que o necessário,
-    //pode ser usada até mesmo se a lista não estiver cheia.
+    
     void resize( ){
     	Object *_newQueue = new Object[ 2 * m_capacity ];
 
@@ -63,7 +67,10 @@ public:
         delete [] m_queue;
     }
 
-    //////// FUNÇÕES BÁSICAS ////////
+    /**
+	 * \brief Insere um elemento na fila.
+	 * \param x Objeto que será adiconado na fila
+	 */
     void enqueue( const Object & x ){
         if ( ( m_back + 1 ) % m_capacity == m_front )
             this->resize();
@@ -74,7 +81,13 @@ public:
         m_back = ( m_back + 1 ) % m_capacity;
         m_queue[ m_back ] = x;
     }
-
+    
+    /**
+	 * \brief Remove um elemento na fila, respeitando a caracteristica FIFO. 
+	 * Ou seja, o primeiro que entrou deve ser o primeiro a sair.
+	 * \param _value Variável que irá receber o objeto removido.
+	 * \return True, se o elemento foi removido com sucesso, False se não.
+	 */
     bool dequeue( Object & _value ){
 
         if ( isEmpty() )
@@ -92,30 +105,34 @@ public:
 
         return true;
     }
-
+    
+    /**
+	 * \brief Determina quem é o objeto no ínicio da fila.
+	 * \return Objeto que se encontra no ínicio da fila.
+	 */
     Object getFront( ) const{
         if ( isEmpty() )
             throw std::out_of_range ("[dequeue()]: Sem elementos na fila");
 
         return m_queue[ m_front ];
     }
-
+    
+    /**
+	 * \brief Determina se a fila está vazia.
+	 * \return True, se a fila estiver vazia, False, caso contrário.
+	 */
     bool isEmpty( ) const{
         return ( m_front == -1 );
     }
-
+    
+    /**
+	 * \brief Esvazia a lista.
+	 */
     void makeEmpty( ){
         m_front = -1;
         m_back = -1;
     }
-/*
-    void debug() {
-        std::cout << "[ " << " ";
-    	for (int i = 0; i < m_capacity; i++ )
-    		std::cout << m_queue[i].getValue() << " ";
-    	std::cout << "]" << "\n";
-    }
-*/
+
 };
 
 #endif

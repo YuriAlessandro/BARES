@@ -1,5 +1,10 @@
-#ifndef _TERM_H_
-#define _TERM_H_
+/**
+ * \file token.h
+ * \brief Classe Token usada para a tokenização das entradas.
+ */
+
+#ifndef _TOKEN_H_
+#define _TOKEN_H_
 
 class Token
 {

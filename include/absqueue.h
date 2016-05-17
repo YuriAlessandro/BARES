@@ -1,4 +1,8 @@
-/**Classe interface fila (não pode ser instanciada!). */
+/**
+ * \file absqueue.h
+ * \brief Classe interface da fila (não pode ser instanciada).
+ */
+ 
 template <class Object>
 class AbsQueue{
 public:
@@ -14,6 +18,8 @@ public:
     virtual void makeEmpty() = 0;
 
 private:
-    // Disable copy constructor
+    /**
+     * \brief Desabilita o construtor cópia
+     */
     AbsQueue ( const AbsQueue & ) { /* Empty */ }
 };

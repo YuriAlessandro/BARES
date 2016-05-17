@@ -19,9 +19,10 @@
 #define FILENAME "test.txt"
 
 /**
- * Função principal do programa:\n
+ * \brief Função principal do programa:\n
  * Executa passos importantes para a leitura do arquivo e chama as funções que irão tratá-lo.\n
- * Também chama as funções de tratamento de erro e a função de calculadora propriamente dita. */
+ * Também chama as funções de tratamento de erro e a função de calculadora propriamente dita.
+ */
 int main(int argc, char* argv[])
 {
     std::string fileName;
